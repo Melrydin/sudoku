@@ -1,0 +1,21 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:pivotX="12"
+        android:pivotY="12"
+        android:scaleX="2.4"
+        android:scaleY="2.4"
+        android:translateX="42"
+        android:translateY="42">
+        <path
+            android:fillColor="@android:color/transparent"
+            android:pathData="@string/sudoku_mark_path"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:strokeWidth="1.65" />
+    </group>
+</vector>

@@ -1,0 +1,7 @@
+<resources>
+    <attr name="homeBackground" format="color" />
+    <attr name="homeForeground" format="color" />
+    <attr name="homeMuted" format="color" />
+    <attr name="homeAccent" format="color" />
+    <attr name="homeOutline" format="color" />
+</resources>

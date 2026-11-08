@@ -1,0 +1,3 @@
+<resources>
+    <string name="sudoku_mark_path" translatable="false">M9,3 L7,21 M17,3 L15,21 M3,9 L21,9 M2,15 L20,15</string>
+</resources>

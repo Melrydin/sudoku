@@ -1,5 +1,27 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="aurum_background">#252521</color>
+    <color name="aurum_foreground">#F0EEE4</color>
+    <color name="aurum_muted">#C4C2B5</color>
+    <color name="aurum_accent">#B9AE76</color>
+    <color name="aurum_outline">#77766A</color>
+    <color name="paper_background">#F8F7F2</color>
+    <color name="paper_foreground">#353831</color>
+    <color name="paper_muted">#65685E</color>
+    <color name="paper_accent">#D5D9C3</color>
+    <color name="paper_outline">#93988A</color>
+    <color name="ocean_background">#F2F7F9</color>
+    <color name="ocean_foreground">#294959</color>
+    <color name="ocean_muted">#5D7784</color>
+    <color name="ocean_accent">#80B4CC</color>
+    <color name="ocean_outline">#8CA7B4</color>
+    <color name="rose_background">#F8F1F0</color>
+    <color name="rose_foreground">#593F42</color>
+    <color name="rose_muted">#82656A</color>
+    <color name="rose_accent">#D9A4A7</color>
+    <color name="rose_outline">#B09294</color>
+    <color name="midnight_background">#1D242E</color>
+    <color name="midnight_foreground">#E5EAF1</color>
+    <color name="midnight_muted">#A9B8CB</color>
+    <color name="midnight_accent">#9FB6D5</color>
+    <color name="midnight_outline">#6F819A</color>
 </resources>

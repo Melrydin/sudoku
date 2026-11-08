@@ -1,9 +1,58 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.Sudoku" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+<resources>
+    <style name="Theme.Sudoku" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:windowBackground">?attr/homeBackground</item>
+        <item name="android:colorBackground">?attr/homeBackground</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="colorPrimary">?attr/homeAccent</item>
+        <item name="colorOnPrimary">?attr/homeBackground</item>
+        <item name="colorSurface">?attr/homeBackground</item>
+        <item name="colorOnSurface">?attr/homeForeground</item>
+        <item name="colorOnSurfaceVariant">?attr/homeMuted</item>
+        <item name="colorOutline">?attr/homeOutline</item>
+        <item name="homeBackground">@color/aurum_background</item>
+        <item name="homeForeground">@color/aurum_foreground</item>
+        <item name="homeMuted">@color/aurum_muted</item>
+        <item name="homeAccent">@color/aurum_accent</item>
+        <item name="homeOutline">@color/aurum_outline</item>
     </style>
 
-    <style name="Theme.Sudoku" parent="Base.Theme.Sudoku" />
+    <style name="Theme.Sudoku.Paper">
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="homeBackground">@color/paper_background</item>
+        <item name="homeForeground">@color/paper_foreground</item>
+        <item name="homeMuted">@color/paper_muted</item>
+        <item name="homeAccent">@color/paper_accent</item>
+        <item name="homeOutline">@color/paper_outline</item>
+    </style>
+
+    <style name="Theme.Sudoku.Ocean">
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="homeBackground">@color/ocean_background</item>
+        <item name="homeForeground">@color/ocean_foreground</item>
+        <item name="homeMuted">@color/ocean_muted</item>
+        <item name="homeAccent">@color/ocean_accent</item>
+        <item name="homeOutline">@color/ocean_outline</item>
+    </style>
+
+    <style name="Theme.Sudoku.Rose">
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="homeBackground">@color/rose_background</item>
+        <item name="homeForeground">@color/rose_foreground</item>
+        <item name="homeMuted">@color/rose_muted</item>
+        <item name="homeAccent">@color/rose_accent</item>
+        <item name="homeOutline">@color/rose_outline</item>
+    </style>
+
+    <style name="Theme.Sudoku.Midnight">
+        <item name="homeBackground">@color/midnight_background</item>
+        <item name="homeForeground">@color/midnight_foreground</item>
+        <item name="homeMuted">@color/midnight_muted</item>
+        <item name="homeAccent">@color/midnight_accent</item>
+        <item name="homeOutline">@color/midnight_outline</item>
+    </style>
 </resources>

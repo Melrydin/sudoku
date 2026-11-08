@@ -1,20 +1,44 @@
 package com.example.sudoku
 
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.example.sudoku.game.GameActivity
+import com.example.sudoku.game.GameStore
+import com.example.sudoku.home.Difficulty
+import com.example.sudoku.home.HomeScreen
+import com.example.sudoku.ui.ThemedActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ThemedActivity() {
+    private val store by lazy { GameStore(this) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+        applySystemInsets(findViewById(R.id.main))
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (refreshTheme()) return
+        HomeScreen(
+            findViewById(R.id.main), preferences, ::selectTheme, ::startNewGame,
+            { difficulty -> startActivity(GameActivity.intent(this, difficulty, false)) },
+            { difficulty -> store.load(difficulty)?.state?.isComplete == false },
+        ).bind()
+    }
+
+    private fun startNewGame(difficulty: Difficulty) {
+        val state = store.load(difficulty)?.state
+        if (state == null || !state.hasEntries || state.isComplete) openNewGame(difficulty)
+        else MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.restart_title)
+            .setMessage(R.string.restart_message)
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.new_game) { _, _ -> openNewGame(difficulty) }
+            .show()
+    }
+
+    private fun openNewGame(difficulty: Difficulty) {
+        startActivity(GameActivity.intent(this, difficulty, true))
     }
 }

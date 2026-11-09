@@ -82,6 +82,7 @@ class NumberPad(private val root: GridLayout, private val onNumber: (Int) -> Uni
         val margin = (4 * density).toInt()
         width = 0
         height = (64 * density).toInt()
+        rowSpec = GridLayout.spec(GridLayout.UNDEFINED, GridLayout.CENTER)
         columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
         setMargins(margin, margin, margin, margin)
     }

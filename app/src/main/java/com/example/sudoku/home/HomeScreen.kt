@@ -2,7 +2,7 @@ package com.example.sudoku.home
 
 import android.view.View
 import android.widget.TextView
-import androidx.core.view.isVisible
+import androidx.core.view.isInvisible
 import com.example.sudoku.R
 
 class HomeScreen(
@@ -58,6 +58,6 @@ class HomeScreen(
         val label = root.findViewById<TextView>(R.id.difficulty_name)
         label.setText(preferences.difficulty.label)
         label.contentDescription = root.context.getString(R.string.difficulty_description, label.text)
-        root.findViewById<View>(R.id.continue_game).isVisible = hasSavedGame(preferences.difficulty)
+        root.findViewById<View>(R.id.continue_game).isInvisible = !hasSavedGame(preferences.difficulty)
     }
 }

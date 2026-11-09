@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.sudoku"
+    namespace = "sudoku"
     compileSdk {
         version = release(37)
     }

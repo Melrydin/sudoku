@@ -22,7 +22,6 @@ import sudoku.R
 import sudoku.data.preferences.GamePreferences
 import sudoku.domain.settings.GameOptions
 import sudoku.testing.ScreenCapture
-import sudoku.ui.settings.SettingsActivity
 
 @RunWith(AndroidJUnit4::class)
 class SettingsScreenTest {
@@ -78,10 +77,11 @@ class SettingsScreenTest {
         listOf(R.id.setting_animations, R.id.setting_timer, R.id.setting_circles,
             R.id.setting_double_tap, R.id.setting_hold).forEach(::toggle)
         scenario.recreate()
-        val expected = GameOptions(boardAnimations = false, showTimer = false, circleGivens = false,
+        val expected = GameOptions(boardAnimations = false, showTimer = false, circleGivens = true,
             doubleTapErase = true, holdToErase = true)
         assertEquals(expected, preferences.options)
         checkToggle(R.id.setting_timer, false)
+        checkToggle(R.id.setting_circles, true)
         checkToggle(R.id.setting_hold, true)
         reopenSection(R.id.settings_gameplay)
         ScreenCapture.capture("settings-gameplay.png")

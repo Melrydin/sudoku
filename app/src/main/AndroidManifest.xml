@@ -12,6 +12,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Sudoku">
         <activity
+            android:name=".home.TimesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".settings.LayoutPreviewActivity"
+            android:exported="false" />
+        <activity
+            android:name=".settings.SettingsActivity"
+            android:exported="false" />
+        <activity
             android:name=".game.GameActivity"
             android:exported="false" />
         <activity

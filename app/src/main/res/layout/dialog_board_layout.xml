@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        style="@style/Widget.Sudoku.LayoutLabel"
+        android:labelFor="@id/layout_width"
+        android:text="@string/layout_width" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/layout_width"
+        style="@style/Widget.Sudoku.LayoutSlider"
+        android:contentDescription="@string/layout_width"
+        android:valueFrom="60"
+        android:valueTo="100" />
+
+    <TextView
+        style="@style/Widget.Sudoku.LayoutLabel"
+        android:labelFor="@id/layout_vertical"
+        android:text="@string/layout_vertical" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/layout_vertical"
+        style="@style/Widget.Sudoku.LayoutSlider"
+        android:contentDescription="@string/layout_vertical"
+        android:valueFrom="0"
+        android:valueTo="100" />
+
+    <TextView
+        style="@style/Widget.Sudoku.LayoutLabel"
+        android:labelFor="@id/layout_horizontal"
+        android:text="@string/layout_horizontal" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/layout_horizontal"
+        style="@style/Widget.Sudoku.LayoutSlider"
+        android:contentDescription="@string/layout_horizontal"
+        android:valueFrom="0"
+        android:valueTo="100" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/layout_reset_horizontal"
+        style="@style/Widget.Sudoku.MenuButton"
+        android:layout_marginTop="16dp"
+        android:text="@string/layout_reset_horizontal" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/layout_cancel"
+            style="@style/Widget.Sudoku.MenuButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:maxLines="1"
+            android:textSize="16sp"
+            android:text="@string/cancel" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/layout_apply"
+            style="@style/Widget.Sudoku.MenuButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:maxLines="1"
+            android:textSize="16sp"
+            android:text="@string/apply" />
+    </LinearLayout>
+</LinearLayout>

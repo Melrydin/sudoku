@@ -7,11 +7,14 @@ import android.os.SystemClock
 import com.example.sudoku.R
 import com.example.sudoku.home.Difficulty
 import com.example.sudoku.home.HomeDialogs
+import com.example.sudoku.settings.GamePreferences
+import com.example.sudoku.settings.SettingsActivity
 import com.example.sudoku.ui.ThemedActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class GameActivity : ThemedActivity() {
     private val store by lazy { GameStore(this) }
+    private val gamePreferences by lazy { GamePreferences(this) }
     private val difficulty by lazy {
         Difficulty.entries.find { it.name == intent.getStringExtra(EXTRA_DIFFICULTY) } ?: Difficulty.EASY
     }
@@ -19,6 +22,7 @@ class GameActivity : ThemedActivity() {
     private lateinit var screen: GameScreen
     private lateinit var timer: GameTimer
     private lateinit var timerDisplay: GameTimerDisplay
+    private lateinit var boardLayout: BoardLayoutController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,12 +31,16 @@ class GameActivity : ThemedActivity() {
         val root = findViewById<android.view.View>(R.id.game_root)
         applySystemInsets(root)
         timerDisplay = GameTimerDisplay(findViewById(R.id.game_timer), timer) { session.state.isComplete }
-        screen = GameScreen(root, session, ::gameChanged)
-        screen.bind(difficulty, ::finish, ::chooseTheme, ::confirmRestart)
+        screen = GameScreen(root, session, ::gameChanged) { gamePreferences.options }
+        screen.bind(difficulty, ::finish, ::chooseTheme, ::confirmRestart, ::openSettings)
+        boardLayout = BoardLayoutController(root)
     }
 
     override fun onResume() {
         super.onResume()
+        if (refreshTheme()) return
+        screen.render()
+        boardLayout.apply(gamePreferences.boardLayout)
         timerDisplay.start()
     }
 
@@ -44,8 +52,7 @@ class GameActivity : ThemedActivity() {
 
     private fun restoreSession(savedInstanceState: Bundle?) {
         val startFresh = savedInstanceState == null && intent.getBooleanExtra(EXTRA_NEW_GAME, false)
-        session = if (startFresh) GameSession(SamplePuzzle.create())
-        else store.load(difficulty) ?: GameSession(SamplePuzzle.create())
+        session = if (startFresh) newSession() else store.load(difficulty) ?: newSession()
         intent.removeExtra(EXTRA_NEW_GAME)
         timer = GameTimer(session.elapsedMillis, SystemClock::elapsedRealtime)
         saveSession()
@@ -62,7 +69,17 @@ class GameActivity : ThemedActivity() {
     }
 
     private fun chooseTheme() {
-        HomeDialogs(this).showThemes(preferences.theme, ::selectTheme)
+        HomeDialogs(this).showThemes(findViewById(R.id.game_theme), preferences.theme, ::selectTheme)
+    }
+
+    private fun openSettings() {
+        startActivity(Intent(this, SettingsActivity::class.java))
+    }
+
+    private fun newSession(): GameSession {
+        val state = SamplePuzzle.create()
+        val notes = if (gamePreferences.options.prefillNotes) GameNotes.prefill(state.board) else state.notes
+        return GameSession(state.copy(notes = notes))
     }
 
     private fun confirmRestart() {
@@ -76,7 +93,7 @@ class GameActivity : ThemedActivity() {
 
     private fun restart() {
         timerDisplay.stop()
-        session = GameSession(SamplePuzzle.create())
+        session = newSession()
         timer = GameTimer(now = SystemClock::elapsedRealtime)
         saveSession()
         recreate()

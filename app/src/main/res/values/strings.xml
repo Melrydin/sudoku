@@ -5,8 +5,6 @@
     <string name="theme_ocean">Ozean</string>
     <string name="theme_rose">Rosé</string>
     <string name="theme_midnight">Mitternacht</string>
-    <string name="previous_theme">Vorheriges Farbthema</string>
-    <string name="next_theme">Nächstes Farbthema</string>
     <string name="theme_description">Farbthema: %1$s</string>
     <string name="difficulty_beginner">Anfänger</string>
     <string name="difficulty_easy">Leicht</string>
@@ -38,10 +36,42 @@
     <string name="cell_editable">bearbeitbar</string>
     <string name="cell_conflict">, widersprüchliche Zahl</string>
     <string name="settings">Einstellungen</string>
+    <string name="back">Zurück</string>
+    <string name="settings_gameplay">Spielverhalten</string>
+    <string name="settings_assists">Spielhilfen</string>
+    <string name="settings_gameplay_title">Spielverhalten\nEinstellungen</string>
+    <string name="settings_layout">Layout</string>
+    <string name="setting_on">AN</string>
+    <string name="setting_off">AUS</string>
+    <string name="setting_animations">Animationen im Spielfeld</string>
+    <string name="setting_timer">Spielzeit anzeigen</string>
+    <string name="setting_timer_summary">Die Zeit läuft auch bei ausgeblendeter Anzeige weiter.</string>
+    <string name="setting_circles">Vorgaben einkreisen</string>
+    <string name="setting_circles_summary">Hebt vorgegebene Zahlen mit einem Kreis hervor.</string>
+    <string name="setting_double_tap">Doppeltippen zum Löschen</string>
+    <string name="setting_hold">Gedrückt halten zum Löschen</string>
+    <string name="layout_width">Breite</string>
+    <string name="layout_vertical">Vertikale Position des Spielfelds</string>
+    <string name="layout_horizontal">Horizontale Position des Spielfelds</string>
+    <string name="layout_reset_horizontal">Horizontal zentrieren</string>
+    <string name="apply">Übernehmen</string>
+    <string name="setting_highlight">Gleiche Ziffern hervorheben</string>
+    <string name="setting_remaining">Verbleibende Anzahl anzeigen</string>
+    <string name="setting_prefill">Notizen vorfüllen</string>
+    <string name="setting_prefill_summary">
+        Neue Spiele starten mit allen in Zeile, Spalte und Block möglichen Notizen.
+    </string>
+    <string name="setting_remove_notes">Notizen automatisch entfernen</string>
+    <string name="setting_hide_digits">Vollständige Ziffern ausblenden</string>
+    <plurals name="enter_number_remaining">
+        <item quantity="one">Zahl eingeben: %1$s, noch %2$d übrig</item>
+        <item quantity="other">Zahl eingeben: %1$s, noch %2$d übrig</item>
+    </plurals>
     <string name="choose_theme">Farbthema wählen</string>
     <string name="best_times">Bestzeiten</string>
     <string name="no_best_times">Noch keine Bestzeiten. Hier erscheinen später deine abgeschlossenen Spiele.</string>
     <string name="about">Über Sudoku</string>
+    <string name="about_version">Version %1$s</string>
     <string name="about_message">Ein klarer Kopf. Neun Zahlen. Dein Moment Ruhe.</string>
     <string name="close">Schließen</string>
 </resources>

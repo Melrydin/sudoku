@@ -1,3 +1,13 @@
 <resources>
     <item name="erase" type="id" />
+    <item name="setting_highlight" type="id" />
+    <item name="setting_remaining" type="id" />
+    <item name="setting_prefill" type="id" />
+    <item name="setting_remove_notes" type="id" />
+    <item name="setting_hide_digits" type="id" />
+    <item name="setting_animations" type="id" />
+    <item name="setting_timer" type="id" />
+    <item name="setting_circles" type="id" />
+    <item name="setting_double_tap" type="id" />
+    <item name="setting_hold" type="id" />
 </resources>

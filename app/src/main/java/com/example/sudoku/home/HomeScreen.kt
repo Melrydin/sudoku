@@ -1,9 +1,11 @@
 package com.example.sudoku.home
 
+import android.content.Intent
 import android.view.View
 import android.widget.TextView
 import androidx.core.view.isInvisible
 import com.example.sudoku.R
+import com.example.sudoku.settings.SettingsActivity
 
 class HomeScreen(
     private val root: View,
@@ -22,11 +24,12 @@ class HomeScreen(
     }
 
     private fun bindThemeSelector() {
-        val label = root.findViewById<TextView>(R.id.theme_name)
-        label.setText(preferences.theme.label)
-        label.contentDescription = root.context.getString(R.string.theme_description, label.text)
-        root.findViewById<View>(R.id.previous_theme).setOnClickListener { shiftTheme(-1) }
-        root.findViewById<View>(R.id.next_theme).setOnClickListener { shiftTheme(1) }
+        root.findViewById<View>(R.id.select_theme).apply {
+            contentDescription = root.context.getString(
+                R.string.theme_description, root.context.getString(preferences.theme.label),
+            )
+            setOnClickListener { dialogs.showThemes(it, preferences.theme, onThemeSelected) }
+        }
     }
 
     private fun bindDifficultySelector() {
@@ -39,14 +42,10 @@ class HomeScreen(
         root.findViewById<View>(R.id.new_game).setOnClickListener { onNewGame(preferences.difficulty) }
         root.findViewById<View>(R.id.continue_game).setOnClickListener { onContinue(preferences.difficulty) }
         root.findViewById<View>(R.id.settings).setOnClickListener {
-            dialogs.showThemes(preferences.theme, onThemeSelected)
+            root.context.startActivity(Intent(root.context, SettingsActivity::class.java))
         }
         root.findViewById<View>(R.id.best_times).setOnClickListener { dialogs.showBestTimes() }
         root.findViewById<View>(R.id.about).setOnClickListener { dialogs.showAbout() }
-    }
-
-    private fun shiftTheme(step: Int) {
-        onThemeSelected(preferences.theme.shiftedBy(step))
     }
 
     private fun shiftDifficulty(step: Int) {

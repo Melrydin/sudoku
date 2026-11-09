@@ -3,15 +3,18 @@ package com.example.sudoku
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.Espresso.pressBack
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.espresso.matcher.ViewMatchers.withContentDescription
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.sudoku.home.Difficulty
 import com.example.sudoku.home.HomePreferences
 import com.example.sudoku.home.HomeTheme
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,24 +47,22 @@ class HomeScreenTest {
         onView(withId(R.id.next_difficulty)).perform(click())
         scenario.recreate()
         onView(withId(R.id.difficulty_name)).check(matches(withText(R.string.difficulty_medium)))
+        ScreenCapture.capture("home.png")
     }
 
     @Test
     fun themeSelectionPreservesDifficulty() {
         onView(withId(R.id.next_difficulty)).perform(click())
-        onView(withId(R.id.next_theme)).perform(click())
-        onView(withId(R.id.theme_name)).check(matches(withText(R.string.theme_paper)))
+        onView(withId(R.id.select_theme)).perform(click())
+        onView(withContentDescription(R.string.theme_paper)).perform(click())
+        assertEquals(HomeTheme.PAPER, preferences.theme)
         onView(withId(R.id.difficulty_name)).check(matches(withText(R.string.difficulty_medium)))
         scenario.recreate()
-        onView(withId(R.id.theme_name)).check(matches(withText(R.string.theme_paper)))
+        assertEquals(HomeTheme.PAPER, preferences.theme)
     }
 
     @Test
-    fun selectorsWrapInBothDirections() {
-        onView(withId(R.id.previous_theme)).perform(click())
-        onView(withId(R.id.theme_name)).check(matches(withText(R.string.theme_midnight)))
-        onView(withId(R.id.next_theme)).perform(click())
-        onView(withId(R.id.theme_name)).check(matches(withText(R.string.theme_aurum)))
+    fun difficultiesWrapInBothDirections() {
         repeat(2) { onView(withId(R.id.previous_difficulty)).perform(click()) }
         onView(withId(R.id.difficulty_name)).check(matches(withText(R.string.difficulty_extreme)))
         onView(withId(R.id.next_difficulty)).perform(click())
@@ -71,15 +72,17 @@ class HomeScreenTest {
     @Test
     fun settingsChangesTheme() {
         onView(withId(R.id.settings)).perform(click())
-        onView(withText(R.string.theme_ocean)).perform(click())
-        onView(withId(R.id.theme_name)).check(matches(withText(R.string.theme_ocean)))
+        onView(withId(R.id.settings_theme)).perform(click())
+        onView(withContentDescription(R.string.theme_ocean)).perform(click())
+        pressBack()
+        assertEquals(HomeTheme.OCEAN, preferences.theme)
     }
 
     @Test
     fun actionsShowHonestEmptyStates() {
         onView(withId(R.id.best_times)).perform(click())
         onView(withText(R.string.no_best_times)).check(matches(withText(R.string.no_best_times)))
-        onView(withText(R.string.close)).perform(click())
+        pressBack()
         onView(withId(R.id.about)).perform(click())
         onView(withText(R.string.about_message)).check(matches(withText(R.string.about_message)))
     }

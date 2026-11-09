@@ -44,8 +44,11 @@ class GameScreen(
 
     fun render() {
         val settings = options()
-        board.render(session.state, settings)
+        board.render(session.state, settings, session.incorrectCells)
         numberPad.render(session.state.board, settings)
+        numberPad.setEnabled(!session.isGameOver)
+        notes.isEnabled = !session.isGameOver
+        renderLives()
         root.findViewById<View>(R.id.game_timer).isVisible = settings.showTimer
         notes.isChecked = session.state.noteMode
         notes.contentDescription = root.context.getString(
@@ -53,6 +56,12 @@ class GameScreen(
         )
         undo.isEnabled = session.canUndo
         root.findViewById<View>(R.id.game_completed).isVisible = session.state.isComplete
+    }
+
+    private fun renderLives() {
+        root.findViewById<TextView>(R.id.game_lives).text = root.context.getString(
+            R.string.game_lives, session.remainingLives, GameSession.MAX_MISTAKES,
+        )
     }
 
     private fun edit(action: GameSession.() -> Unit) {

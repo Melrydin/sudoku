@@ -10,6 +10,8 @@ object GameStateCodec {
     fun encode(session: GameSession): String = JSONObject()
         .put("version", 1)
         .put("elapsedMillis", session.elapsedMillis)
+        .put("solution", session.solution.cells.joinToString(""))
+        .put("mistakes", session.mistakes)
         .put("state", encodeState(session.state))
         .put("history", JSONArray().apply { session.undoHistory.forEach { put(encodeState(it)) } })
         .toString()
@@ -22,8 +24,21 @@ object GameStateCodec {
         require(history.length() <= GameSession.MAX_HISTORY)
         val snapshots = (0 until history.length()).map { decodeState(history.getJSONObject(it)) }
         require(snapshots.all { it.puzzle.cells == state.puzzle.cells })
-        GameSession(state, snapshots, json.optLong("elapsedMillis", 0))
+        restoreSession(json, state, snapshots)
     }.getOrNull()
+
+    private fun restoreSession(json: JSONObject, state: GameState, history: List<GameState>): GameSession = GameSession(
+        initialState = state,
+        history = history,
+        initialElapsedMillis = json.optLong("elapsedMillis", 0),
+        initialSolution = decodeSolution(json),
+        initialMistakes = decodeMistakes(json),
+    )
+
+    private fun decodeSolution(json: JSONObject): SudokuBoard? =
+        if (json.has("solution")) SudokuBoard.parse(json.getString("solution")) else null
+
+    private fun decodeMistakes(json: JSONObject): Int = if (json.has("mistakes")) json.getInt("mistakes") else 0
 
     private fun encodeState(state: GameState): JSONObject = JSONObject()
         .put("puzzle", state.puzzle.cells.joinToString(""))

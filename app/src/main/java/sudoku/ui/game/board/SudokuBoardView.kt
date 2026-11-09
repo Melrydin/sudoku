@@ -30,8 +30,8 @@ class SudokuBoardView @JvmOverloads constructor(context: Context, attrs: Attribu
         cells.forEach(::addView)
     }
 
-    fun render(state: GameState, options: GameOptions = GameOptions()) {
-        val conflicts = SudokuRules.conflicts(state.board)
+    fun render(state: GameState, options: GameOptions = GameOptions(), incorrectCells: Set<Int>? = null) {
+        val conflicts = incorrectCells ?: SudokuRules.conflicts(state.board)
         cells.forEach { it.render(state, conflicts, options) }
     }
 

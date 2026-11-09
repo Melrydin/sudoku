@@ -10,7 +10,7 @@ import sudoku.ui.common.PlayTimeFormatter
 class GameTimerDisplay(
     private val view: TextView,
     private val timer: GameTimer,
-    private val isComplete: () -> Boolean,
+    private val hasEnded: () -> Boolean,
 ) {
     private val handler = Handler(Looper.getMainLooper())
     private var active = false
@@ -34,7 +34,7 @@ class GameTimerDisplay(
     }
 
     fun refresh() {
-        if (active && !isComplete()) timer.resume() else timer.pause()
+        if (active && !hasEnded()) timer.resume() else timer.pause()
         val time = PlayTimeFormatter.format(timer.elapsedMillis, view.resources.configuration.locales[0])
         view.text = time
         view.contentDescription = view.context.getString(R.string.play_time_description, time)

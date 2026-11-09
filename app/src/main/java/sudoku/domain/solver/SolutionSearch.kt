@@ -9,8 +9,14 @@ internal class SolutionSearch(board: SudokuBoard) {
     private val columns = IntArray(SudokuBoard.SIZE)
     private val boxes = IntArray(SudokuBoard.SIZE)
     private val valid = initializeMasks()
+    private var firstSolution: SudokuBoard? = null
 
     fun count(): Int = if (valid) search(2) else 0
+
+    fun solution(): SudokuBoard? {
+        if (valid) search(1)
+        return firstSolution
+    }
 
     private fun initializeMasks(): Boolean {
         for (cell in cells.indices) {
@@ -24,7 +30,7 @@ internal class SolutionSearch(board: SudokuBoard) {
 
     private fun search(limit: Int): Int {
         checkCancellation()
-        val cell = mostConstrainedCell() ?: return 1
+        val cell = mostConstrainedCell() ?: return recordSolution()
         var candidates = availableMask(cell)
         var count = 0
         while (candidates != 0 && count < limit) {
@@ -38,6 +44,11 @@ internal class SolutionSearch(board: SudokuBoard) {
             candidates = candidates xor bit
         }
         return count
+    }
+
+    private fun recordSolution(): Int {
+        if (firstSolution == null) firstSolution = SudokuBoard.from(cells.toList())
+        return 1
     }
 
     private fun mostConstrainedCell(): Int? {

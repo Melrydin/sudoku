@@ -8,6 +8,7 @@ import android.text.style.RelativeSizeSpan
 import android.widget.GridLayout
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isInvisible
+import androidx.core.view.children
 import com.google.android.material.button.MaterialButton
 import sudoku.R
 import sudoku.domain.board.DigitCounts
@@ -35,6 +36,10 @@ class NumberPad(private val root: GridLayout, private val onNumber: (Int) -> Uni
                 R.plurals.enter_number_remaining, remaining, digit, remaining,
             ) else root.context.getString(R.string.enter_number, digit)
         }
+    }
+
+    fun setEnabled(enabled: Boolean) {
+        root.children.forEach { it.isEnabled = enabled }
     }
 
     private fun countedLabel(digit: String, remaining: Int): SpannableString {

@@ -19,10 +19,12 @@ import sudoku.domain.generation.GeneratorConfig
 import sudoku.domain.puzzle.Difficulty
 import sudoku.domain.puzzle.GeneratorVersion
 import sudoku.domain.puzzle.PuzzleId
+import sudoku.ui.theme.ThemePalette
 import sudoku.ui.common.ThemedActivity
 import sudoku.ui.game.board.BoardLayoutController
+import sudoku.ui.game.result.GameOverDialog
+import sudoku.ui.navigation.HomeNavigation
 import sudoku.ui.settings.SettingsActivity
-import sudoku.ui.theme.ThemePalette
 
 class GameActivity : ThemedActivity() {
     private val store by lazy { appContainer.games }
@@ -31,6 +33,8 @@ class GameActivity : ThemedActivity() {
     private val preparation by lazy { ViewModelProvider(this)[GamePreparationModel::class.java] }
     private var startFresh = false
     private var gameReady = false
+    private var gameOverPending = false
+    private var gameOverDialog: GameOverDialog? = null
     private lateinit var session: GameSession
     private lateinit var screen: GameScreen
     private lateinit var timer: GameTimer
@@ -39,6 +43,10 @@ class GameActivity : ThemedActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (savedInstanceState?.getBoolean(EXTRA_GAME_OVER) == true) {
+            showGameOver()
+            return
+        }
         preparation.state.observe(this, ::renderPreparation)
         prepareSession(savedInstanceState)
     }
@@ -46,6 +54,10 @@ class GameActivity : ThemedActivity() {
     override fun onResume() {
         super.onResume()
         if (refreshTheme()) return
+        if (gameOverPending) {
+            showGameOver()
+            return
+        }
         if (gameReady) resumeGame()
     }
 
@@ -63,8 +75,14 @@ class GameActivity : ThemedActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putBoolean(EXTRA_NEW_GAME, startFresh)
+        outState.putBoolean(EXTRA_GAME_OVER, gameOverPending)
         if (gameReady) saveSession()
         super.onSaveInstanceState(outState)
+    }
+
+    override fun onDestroy() {
+        gameOverDialog?.dismiss()
+        super.onDestroy()
     }
 
     private fun prepareSession(savedInstanceState: Bundle?) {
@@ -112,7 +130,9 @@ class GameActivity : ThemedActivity() {
     private fun bindGameViews() {
         val root = findViewById<View>(R.id.game_root)
         applySystemInsets(root)
-        timerDisplay = GameTimerDisplay(findViewById(R.id.game_timer), timer) { session.state.isComplete }
+        timerDisplay = GameTimerDisplay(findViewById(R.id.game_timer), timer) {
+            session.state.isComplete || session.isGameOver
+        }
         screen = GameScreen(root, session, ::gameChanged) { gamePreferences.options }
         screen.bind(puzzle, ::finish, ::chooseTheme, ::confirmRestart, ::openSettings)
         boardLayout = BoardLayoutController(root)
@@ -120,6 +140,7 @@ class GameActivity : ThemedActivity() {
     }
 
     private fun saveSession() {
+        if (session.isGameOver) return store.delete(puzzle)
         session.trackElapsedTime(timer.elapsedMillis)
         store.save(puzzle, session)
     }
@@ -127,6 +148,28 @@ class GameActivity : ThemedActivity() {
     private fun gameChanged() {
         timerDisplay.refresh()
         saveSession()
+        if (session.isGameOver) showGameOver()
+    }
+
+    private fun showGameOver() {
+        gameOverPending = true
+        if (::timerDisplay.isInitialized) timerDisplay.stop()
+        store.delete(puzzle)
+        if (!gameReady) showGameOverBackground()
+        val dialog = gameOverDialog ?: GameOverDialog(this, ::returnHome).also { gameOverDialog = it }
+        dialog.show()
+    }
+
+    private fun showGameOverBackground() {
+        setContentView(R.layout.activity_game_loading)
+        applySystemInsets(findViewById(R.id.game_loading_root))
+        findViewById<View>(R.id.generation_progress).isVisible = false
+        findViewById<TextView>(R.id.game_preparation_message).setText(R.string.game_over)
+        findViewById<View>(R.id.back_home).setOnClickListener { returnHome() }
+    }
+
+    private fun returnHome() {
+        HomeNavigation.open(this, puzzle)
     }
 
     private fun chooseTheme() {
@@ -148,7 +191,10 @@ class GameActivity : ThemedActivity() {
 
     private fun restart() {
         timerDisplay.stop()
-        preparation.setSession(NewGameFactory.fromPuzzle(session.state.puzzle, gamePreferences.options.prefillNotes))
+        val next = NewGameFactory.fromPuzzle(
+            session.state.puzzle, gamePreferences.options.prefillNotes, session.solution,
+        )
+        preparation.setSession(next)
     }
 
     private fun puzzleFromIntent(): PuzzleId {
@@ -164,6 +210,7 @@ class GameActivity : ThemedActivity() {
         private const val EXTRA_LEVEL = "level"
         private const val EXTRA_VERSION = "generator_version"
         private const val EXTRA_NEW_GAME = "new_game"
+        private const val EXTRA_GAME_OVER = "game_over"
 
         fun intent(context: Context, puzzle: PuzzleId, newGame: Boolean): Intent =
             Intent(context, GameActivity::class.java)

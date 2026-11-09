@@ -13,5 +13,5 @@ object TestBoards {
             "345286179",
     )
 
-    fun empty(): SudokuBoard = SudokuBoard.from(List(SudokuBoard.CELL_COUNT) { 0 })
+    fun empty(): SudokuBoard = SudokuBoard.empty()
 }

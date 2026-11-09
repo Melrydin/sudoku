@@ -13,6 +13,8 @@ class SudokuBoard private constructor(val cells: List<Int>) {
         const val BOX_SIZE: Int = 3
         const val CELL_COUNT: Int = SIZE * SIZE
 
+        fun empty(): SudokuBoard = from(List(CELL_COUNT) { 0 })
+
         fun from(cells: List<Int>): SudokuBoard {
             require(cells.size == CELL_COUNT && cells.all { it in 0..SIZE })
             return SudokuBoard(cells.toList())

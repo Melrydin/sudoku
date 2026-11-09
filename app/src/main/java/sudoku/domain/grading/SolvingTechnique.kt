@@ -1,0 +1,18 @@
+package sudoku.domain.grading
+
+enum class SolvingTechnique {
+    FULL_HOUSE,
+    NAKED_SINGLE,
+    HIDDEN_SINGLE,
+    LOCKED_CANDIDATES_POINTING,
+    LOCKED_CANDIDATES_CLAIMING,
+    NAKED_PAIR,
+    HIDDEN_PAIR,
+    NAKED_TRIPLE,
+    HIDDEN_TRIPLE,
+    X_WING,
+    NAKED_QUAD,
+    HIDDEN_QUAD,
+    SWORDFISH,
+    XY_WING,
+}

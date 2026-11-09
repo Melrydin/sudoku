@@ -94,7 +94,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/sample_puzzle_label">
 
-                <sudoku.game.SudokuBoardView
+                <sudoku.ui.game.board.SudokuBoardView
                     android:id="@+id/sudoku_board"
                     android:layout_width="300dp"
                     android:layout_height="300dp"

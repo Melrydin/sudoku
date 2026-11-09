@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
+        android:name=".app.SudokuApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -12,27 +13,31 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Sudoku">
         <activity
-            android:name=".home.TimesActivity"
+            android:name=".ui.statistics.TimesActivity"
             android:exported="false" />
         <activity
-            android:name=".settings.LayoutPreviewActivity"
+            android:name=".ui.settings.layout.LayoutPreviewActivity"
             android:exported="false" />
         <activity
-            android:name=".settings.SettingsActivity"
+            android:name=".ui.settings.SettingsActivity"
             android:exported="false" />
         <activity
-            android:name=".game.GameActivity"
+            android:name=".ui.game.GameActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.home.MainActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity-alias
             android:name=".MainActivity"
             android:exported="true"
-            android:windowSoftInputMode="adjustResize">
+            android:targetActivity=".ui.home.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
     </application>
 
 </manifest>

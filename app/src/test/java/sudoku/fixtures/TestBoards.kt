@@ -1,0 +1,19 @@
+package sudoku.fixtures
+
+import sudoku.domain.board.SudokuBoard
+
+object TestBoards {
+    fun solved(): SudokuBoard = SudokuBoard.parse(
+        "534678912" +
+            "672195348" +
+            "198342567" +
+            "859761423" +
+            "426853791" +
+            "713924856" +
+            "961537284" +
+            "287419635" +
+            "345286179",
+    )
+
+    fun empty(): SudokuBoard = SudokuBoard.empty()
+}

@@ -28,6 +28,7 @@ abstract class ThemedActivity : AppCompatActivity() {
             view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
             insets
         }
+        ViewCompat.requestApplyInsets(root)
     }
 
     protected fun selectTheme(theme: HomeTheme) {

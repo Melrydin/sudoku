@@ -4,8 +4,14 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.SystemClock
+import android.view.View
+import android.widget.TextView
+import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
 import sudoku.R
-import sudoku.home.Difficulty
+import sudoku.generator.GeneratorConfig
+import sudoku.generator.GeneratorVersion
 import sudoku.home.HomeDialogs
 import sudoku.settings.GamePreferences
 import sudoku.settings.SettingsActivity
@@ -15,9 +21,10 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 class GameActivity : ThemedActivity() {
     private val store by lazy { GameStore(this) }
     private val gamePreferences by lazy { GamePreferences(this) }
-    private val difficulty by lazy {
-        Difficulty.entries.find { it.name == intent.getStringExtra(EXTRA_DIFFICULTY) } ?: Difficulty.EASY
-    }
+    private val puzzle by lazy { puzzleFromIntent() }
+    private val preparation by lazy { ViewModelProvider(this)[GamePreparationModel::class.java] }
+    private var startFresh = false
+    private var gameReady = false
     private lateinit var session: GameSession
     private lateinit var screen: GameScreen
     private lateinit var timer: GameTimer
@@ -26,19 +33,17 @@ class GameActivity : ThemedActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        restoreSession(savedInstanceState)
-        setContentView(R.layout.activity_game)
-        val root = findViewById<android.view.View>(R.id.game_root)
-        applySystemInsets(root)
-        timerDisplay = GameTimerDisplay(findViewById(R.id.game_timer), timer) { session.state.isComplete }
-        screen = GameScreen(root, session, ::gameChanged) { gamePreferences.options }
-        screen.bind(difficulty, ::finish, ::chooseTheme, ::confirmRestart, ::openSettings)
-        boardLayout = BoardLayoutController(root)
+        preparation.state.observe(this, ::renderPreparation)
+        prepareSession(savedInstanceState)
     }
 
     override fun onResume() {
         super.onResume()
         if (refreshTheme()) return
+        if (gameReady) resumeGame()
+    }
+
+    private fun resumeGame() {
         screen.render()
         boardLayout.apply(gamePreferences.boardLayout)
         timerDisplay.start()
@@ -50,17 +55,67 @@ class GameActivity : ThemedActivity() {
         super.onPause()
     }
 
-    private fun restoreSession(savedInstanceState: Bundle?) {
-        val startFresh = savedInstanceState == null && intent.getBooleanExtra(EXTRA_NEW_GAME, false)
-        session = if (startFresh) newSession() else store.load(difficulty) ?: newSession()
-        intent.removeExtra(EXTRA_NEW_GAME)
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean(EXTRA_NEW_GAME, startFresh)
+        if (gameReady) saveSession()
+        super.onSaveInstanceState(outState)
+    }
+
+    private fun prepareSession(savedInstanceState: Bundle?) {
+        startFresh = savedInstanceState?.getBoolean(EXTRA_NEW_GAME)
+            ?: intent.getBooleanExtra(EXTRA_NEW_GAME, false)
+        val saved = if (startFresh) null else store.load(puzzle)
+        preparation.prepare(saved, puzzle, gamePreferences.options.prefillNotes)
+    }
+
+    private fun renderPreparation(state: GamePreparationState) {
+        when (state) {
+            GamePreparationState.Loading -> showLoading(false)
+            GamePreparationState.Failed -> showLoading(true)
+            is GamePreparationState.Ready -> bindSession(state.session)
+        }
+    }
+
+    private fun showLoading(failed: Boolean) {
+        gameReady = false
+        setContentView(R.layout.activity_game_loading)
+        applySystemInsets(findViewById(R.id.game_loading_root))
+        findViewById<View>(R.id.back_home).setOnClickListener { finish() }
+        findViewById<View>(R.id.generation_progress).isVisible = !failed
+        findViewById<View>(R.id.retry_generation).apply {
+            isVisible = failed
+            setOnClickListener { preparation.retry(puzzle, gamePreferences.options.prefillNotes) }
+        }
+        findViewById<TextView>(R.id.game_preparation_message).setText(
+            if (failed) R.string.generation_failed else R.string.generating_puzzle,
+        )
+    }
+
+    private fun bindSession(restored: GameSession) {
+        if (::timerDisplay.isInitialized) timerDisplay.stop()
+        session = restored
         timer = GameTimer(session.elapsedMillis, SystemClock::elapsedRealtime)
+        setContentView(R.layout.activity_game)
+        bindGameViews()
+        startFresh = false
+        intent.removeExtra(EXTRA_NEW_GAME)
         saveSession()
+        if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) resumeGame()
+    }
+
+    private fun bindGameViews() {
+        val root = findViewById<View>(R.id.game_root)
+        applySystemInsets(root)
+        timerDisplay = GameTimerDisplay(findViewById(R.id.game_timer), timer) { session.state.isComplete }
+        screen = GameScreen(root, session, ::gameChanged) { gamePreferences.options }
+        screen.bind(puzzle, ::finish, ::chooseTheme, ::confirmRestart, ::openSettings)
+        boardLayout = BoardLayoutController(root)
+        gameReady = true
     }
 
     private fun saveSession() {
         session.trackElapsedTime(timer.elapsedMillis)
-        store.save(difficulty, session)
+        store.save(puzzle, session)
     }
 
     private fun gameChanged() {
@@ -76,12 +131,6 @@ class GameActivity : ThemedActivity() {
         startActivity(Intent(this, SettingsActivity::class.java))
     }
 
-    private fun newSession(): GameSession {
-        val state = SamplePuzzle.create()
-        val notes = if (gamePreferences.options.prefillNotes) GameNotes.prefill(state.board) else state.notes
-        return GameSession(state.copy(notes = notes))
-    }
-
     private fun confirmRestart() {
         if (!session.state.hasEntries || session.state.isComplete) restart() else MaterialAlertDialogBuilder(this)
             .setTitle(R.string.restart_title)
@@ -93,19 +142,28 @@ class GameActivity : ThemedActivity() {
 
     private fun restart() {
         timerDisplay.stop()
-        session = newSession()
-        timer = GameTimer(now = SystemClock::elapsedRealtime)
-        saveSession()
-        recreate()
+        preparation.setSession(NewGameFactory.fromPuzzle(session.state.puzzle, gamePreferences.options.prefillNotes))
+    }
+
+    private fun puzzleFromIntent(): PuzzleId {
+        val difficulty = Difficulty.entries.find { it.name == intent.getStringExtra(EXTRA_DIFFICULTY) }
+            ?: Difficulty.EASY
+        val version = GeneratorVersion.entries.find { it.number == intent.getIntExtra(EXTRA_VERSION, 1) }
+            ?: GeneratorConfig.VERSION
+        return PuzzleId(difficulty, intent.getIntExtra(EXTRA_LEVEL, 1).coerceAtLeast(1), version)
     }
 
     companion object {
         private const val EXTRA_DIFFICULTY = "difficulty"
+        private const val EXTRA_LEVEL = "level"
+        private const val EXTRA_VERSION = "generator_version"
         private const val EXTRA_NEW_GAME = "new_game"
 
-        fun intent(context: Context, difficulty: Difficulty, newGame: Boolean): Intent =
+        fun intent(context: Context, puzzle: PuzzleId, newGame: Boolean): Intent =
             Intent(context, GameActivity::class.java)
-                .putExtra(EXTRA_DIFFICULTY, difficulty.name)
+                .putExtra(EXTRA_DIFFICULTY, puzzle.difficulty.name)
+                .putExtra(EXTRA_LEVEL, puzzle.level)
+                .putExtra(EXTRA_VERSION, puzzle.version.number)
                 .putExtra(EXTRA_NEW_GAME, newGame)
     }
 }

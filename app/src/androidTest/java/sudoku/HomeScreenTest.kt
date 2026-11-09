@@ -9,8 +9,9 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.espresso.matcher.ViewMatchers.withContentDescription
+import androidx.test.espresso.matcher.ViewMatchers.isEnabled
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import sudoku.home.Difficulty
+import sudoku.game.Difficulty
 import sudoku.home.HomePreferences
 import sudoku.home.HomeTheme
 import org.junit.After
@@ -18,6 +19,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.hamcrest.Matchers.not
 
 @RunWith(AndroidJUnit4::class)
 class HomeScreenTest {
@@ -25,11 +27,13 @@ class HomeScreenTest {
     private lateinit var scenario: ActivityScenario<MainActivity>
     private lateinit var previousTheme: HomeTheme
     private lateinit var previousDifficulty: Difficulty
+    private var previousLevels: Map<Difficulty, Int> = emptyMap()
 
     @Before
     fun setUp() {
         previousTheme = preferences.theme
         previousDifficulty = preferences.difficulty
+        previousLevels = resetLevels()
         preferences.theme = HomeTheme.AURUM
         preferences.difficulty = Difficulty.EASY
         scenario = ActivityScenario.launch(MainActivity::class.java)
@@ -38,6 +42,10 @@ class HomeScreenTest {
     @After
     fun tearDown() {
         scenario.close()
+        previousLevels.forEach { (difficulty, level) ->
+            preferences.difficulty = difficulty
+            preferences.level = level
+        }
         preferences.theme = previousTheme
         preferences.difficulty = previousDifficulty
     }
@@ -85,5 +93,40 @@ class HomeScreenTest {
         pressBack()
         onView(withId(R.id.about)).perform(click())
         onView(withId(R.id.about_close)).check(matches(withText(R.string.close)))
+    }
+
+    @Test
+    fun levelsSurviveRecreationAndAreIndependentPerDifficulty() {
+        repeat(2) { onView(withId(R.id.next_level)).perform(click()) }
+        checkLevel(3)
+        onView(withId(R.id.next_difficulty)).perform(click())
+        checkLevel(1)
+        onView(withId(R.id.next_level)).perform(click())
+        checkLevel(2)
+        onView(withId(R.id.previous_difficulty)).perform(click())
+        checkLevel(3)
+        scenario.recreate()
+        checkLevel(3)
+    }
+
+    @Test
+    fun theFirstLevelCannotBeDecremented() {
+        onView(withId(R.id.previous_level)).check(matches(not(isEnabled())))
+        onView(withId(R.id.next_level)).perform(click())
+        onView(withId(R.id.previous_level)).perform(click())
+        checkLevel(1)
+        onView(withId(R.id.previous_level)).check(matches(not(isEnabled())))
+    }
+
+    private fun checkLevel(level: Int) {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        onView(withId(R.id.level_name)).check(matches(withText(context.getString(R.string.level_number, level))))
+    }
+
+    private fun resetLevels(): Map<Difficulty, Int> = Difficulty.entries.associateWith {
+        preferences.difficulty = it
+        val previous = preferences.level
+        preferences.level = 1
+        previous
     }
 }

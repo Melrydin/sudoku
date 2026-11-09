@@ -5,8 +5,11 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.os.SystemClock
+import android.view.View
 import androidx.lifecycle.Lifecycle
 import androidx.core.content.edit
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
@@ -32,7 +35,13 @@ import sudoku.game.GameSession
 import sudoku.game.GameNotes
 import sudoku.game.GameOptions
 import sudoku.game.SamplePuzzle
-import sudoku.home.Difficulty
+import sudoku.game.Difficulty
+import sudoku.game.PuzzleId
+import sudoku.game.GameState
+import sudoku.generator.PuzzleRandom
+import sudoku.generator.SolutionCount
+import sudoku.generator.SolutionCounter
+import sudoku.generator.SudokuGenerator
 import sudoku.home.HomePreferences
 import sudoku.home.HomeTheme
 import sudoku.settings.GamePreferences
@@ -50,12 +59,14 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class GameScreenTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
+    private val easyPuzzle = PuzzleId(Difficulty.EASY)
     private val preferences = context.getSharedPreferences("games", Context.MODE_PRIVATE)
     private var previousGames: Map<String, *> = emptyMap<String, String>()
     private lateinit var scenario: ActivityScenario<GameActivity>
     private val homePreferences = HomePreferences(context)
     private lateinit var previousTheme: HomeTheme
     private lateinit var previousDifficulty: Difficulty
+    private var previousEasyLevel: Int = 1
     private val gamePreferences = GamePreferences(context)
     private lateinit var previousOptions: GameOptions
 
@@ -67,8 +78,11 @@ class GameScreenTest {
         previousOptions = gamePreferences.options
         gamePreferences.options = GameOptions()
         homePreferences.difficulty = Difficulty.EASY
+        previousEasyLevel = homePreferences.level
+        homePreferences.level = 1
         preferences.edit { clear() }
-        scenario = ActivityScenario.launch(GameActivity.intent(context, Difficulty.EASY, true))
+        GameStore(context).save(easyPuzzle, GameSession(SamplePuzzle.create()))
+        scenario = ActivityScenario.launch(GameActivity.intent(context, easyPuzzle, false))
     }
 
     @After
@@ -79,6 +93,8 @@ class GameScreenTest {
             previousGames.forEach { (key, value) -> putString(key, value as String) }
         }
         homePreferences.theme = previousTheme
+        homePreferences.difficulty = Difficulty.EASY
+        homePreferences.level = previousEasyLevel
         homePreferences.difficulty = previousDifficulty
         gamePreferences.options = previousOptions
     }
@@ -106,7 +122,7 @@ class GameScreenTest {
         cell(2).check(matches(withContentDescription("Zeile 1, Spalte 3, Notizen: 4, bearbeitbar")))
         onView(withId(R.id.notes)).check(matches(withContentDescription(R.string.notes_enabled)))
         onView(withId(R.id.undo)).perform(scrollTo(), click())
-        assertTrue(GameStore(context).load(Difficulty.EASY)!!.state.notes[2].isEmpty())
+        assertTrue(GameStore(context).load(easyPuzzle)!!.state.notes[2].isEmpty())
     }
 
     @Test
@@ -126,7 +142,7 @@ class GameScreenTest {
         cell(2).perform(click())
         number(4).perform(scrollTo(), click())
         scenario.close()
-        scenario = ActivityScenario.launch(GameActivity.intent(context, Difficulty.EASY, false))
+        scenario = ActivityScenario.launch(GameActivity.intent(context, easyPuzzle, false))
         cell(2).check(matches(withText("4")))
     }
 
@@ -135,10 +151,10 @@ class GameScreenTest {
         cell(2).perform(click())
         number(4).perform(scrollTo(), click())
         val store = GameStore(context)
-        assertNotNull(store.load(Difficulty.EASY))
-        assertNull(store.load(Difficulty.HARD))
+        assertNotNull(store.load(easyPuzzle))
+        assertNull(store.load(PuzzleId(Difficulty.HARD)))
         assertNull(GameStateCodec.decode("broken json"))
-        assertEquals(4, store.load(Difficulty.EASY)!!.state.board[2])
+        assertEquals(4, store.load(easyPuzzle)!!.state.board[2])
     }
 
     @Test
@@ -157,14 +173,17 @@ class GameScreenTest {
         scenario.close()
         ActivityScenario.launch(MainActivity::class.java).use {
             onView(withId(R.id.new_game)).perform(click())
-            cell(2).perform(click())
+            waitForGame()
+            val editable = GameStore(context).load(easyPuzzle)!!.state.puzzle.cells.indexOf(0)
+            cell(editable).perform(click())
+            assertEquals(editable, GameStore(context).load(easyPuzzle)!!.state.selectedCell)
             number(4).perform(scrollTo(), click())
-            assertEquals(4, GameStore(context).load(Difficulty.EASY)!!.state.board[2])
+            assertEquals(4, GameStore(context).load(easyPuzzle)!!.state.board[editable])
             pressBack()
-            assertEquals(4, GameStore(context).load(Difficulty.EASY)!!.state.board[2])
+            assertEquals(4, GameStore(context).load(easyPuzzle)!!.state.board[editable])
             onView(withId(R.id.continue_game)).check(matches(isDisplayed()))
             onView(withId(R.id.continue_game)).perform(click())
-            cell(2).check(matches(withText("4")))
+            cell(editable).check(matches(withText("4")))
             pressBack()
         }
     }
@@ -185,16 +204,36 @@ class GameScreenTest {
     }
 
     @Test
+    fun homeResumesOnlyTheSelectedLevel() {
+        scenario.close()
+        ActivityScenario.launch(MainActivity::class.java).use {
+            onView(withId(R.id.next_level)).perform(click())
+            val editable = startSelectedLevelAndEnter(4)
+            pressBack()
+            onView(withId(R.id.continue_game)).check(matches(isDisplayed()))
+            onView(withId(R.id.next_level)).perform(click())
+            onView(withId(R.id.continue_game)).check(matches(withEffectiveVisibility(Visibility.INVISIBLE)))
+            onView(withId(R.id.previous_level)).perform(click())
+            onView(withId(R.id.continue_game)).perform(click())
+            cell(editable).check(matches(withText("4")))
+            pressBack()
+        }
+    }
+
+    @Test
     fun prefillingOnlyAffectsNewGamesAndSurvivesRecreation() {
         gamePreferences.options = GameOptions(prefillNotes = true)
         scenario.close()
-        scenario = ActivityScenario.launch(GameActivity.intent(context, Difficulty.EASY, true))
+        scenario = ActivityScenario.launch(GameActivity.intent(context, easyPuzzle, true))
+        waitForGame()
         val store = GameStore(context)
-        assertEquals(GameNotes.prefill(SamplePuzzle.create().board), store.load(Difficulty.EASY)!!.state.notes)
-        cell(2).perform(click())
+        val puzzle = store.load(easyPuzzle)!!.state.puzzle
+        val editable = puzzle.cells.indexOf(0)
+        assertEquals(GameNotes.prefill(puzzle), store.load(easyPuzzle)!!.state.notes)
+        cell(editable).perform(click())
         onView(withId(R.id.erase)).perform(scrollTo(), click())
         scenario.recreate()
-        assertTrue(store.load(Difficulty.EASY)!!.state.notes[2].isEmpty())
+        assertTrue(store.load(easyPuzzle)!!.state.notes[editable].isEmpty())
     }
 
     @Test
@@ -203,8 +242,8 @@ class GameScreenTest {
         val puzzle = SamplePuzzle.create().puzzle
         val board = puzzle.cells.indices.filter { puzzle[it] == 0 }.take(5)
             .fold(puzzle) { current, index -> current.withValue(index, 5) }
-        GameStore(context).save(Difficulty.EASY, GameSession(sudoku.game.GameState(puzzle, board)))
-        scenario = ActivityScenario.launch(GameActivity.intent(context, Difficulty.EASY, false))
+        GameStore(context).save(easyPuzzle, GameSession(sudoku.game.GameState(puzzle, board)))
+        scenario = ActivityScenario.launch(GameActivity.intent(context, easyPuzzle, false))
         cell(8).perform(click())
         number(5).perform(scrollTo(), click())
         number(5).check(matches(withEffectiveVisibility(Visibility.INVISIBLE)))
@@ -233,12 +272,12 @@ class GameScreenTest {
         SystemClock.sleep(1_200)
         scenario.moveToState(Lifecycle.State.STARTED)
         val store = GameStore(context)
-        val paused = requireNotNull(store.load(Difficulty.EASY)).elapsedMillis
+        val paused = requireNotNull(store.load(easyPuzzle)).elapsedMillis
         assertTrue(paused >= 1_000)
         SystemClock.sleep(1_200)
         scenario.moveToState(Lifecycle.State.RESUMED)
         scenario.moveToState(Lifecycle.State.STARTED)
-        val resumed = requireNotNull(store.load(Difficulty.EASY)).elapsedMillis
+        val resumed = requireNotNull(store.load(easyPuzzle)).elapsedMillis
         assertTrue(resumed in paused..(paused + 1_000))
     }
 
@@ -259,6 +298,57 @@ class GameScreenTest {
         icon.setBounds(0, 0, bitmap.width, bitmap.height)
         icon.draw(Canvas(bitmap))
         ScreenCapture.save("app-icon.png", bitmap)
+    }
+
+    @Test
+    fun newGamesUseUniqueGeneratedPuzzlesAndSurviveRecreation() {
+        scenario.close()
+        scenario = ActivityScenario.launch(GameActivity.intent(context, easyPuzzle, true))
+        scenario.recreate()
+        waitForGame()
+        val state = GameStore(context).load(easyPuzzle)!!.state
+        assertEquals(SolutionCount.UNIQUE, SolutionCounter().count(state.puzzle))
+        assertTrue(state.puzzle.cells != SamplePuzzle.create().puzzle.cells)
+        assertTrue(!state.isComplete && !state.hasEntries)
+        onView(withId(R.id.sample_puzzle_label)).check(matches(withText(R.string.unrated_puzzle)))
+        checkHeaderBelowStatusBar()
+        ScreenCapture.capture("generated-game.png")
+    }
+
+    @Test
+    fun completingAGeneratedPuzzleShowsTheCompletionMessage() {
+        scenario.close()
+        scenario = ActivityScenario.launch(GameActivity.intent(context, easyPuzzle, true))
+        waitForGame()
+        val puzzle = GameStore(context).load(easyPuzzle)!!.state.puzzle
+        val solution = SudokuGenerator(PuzzleRandom.forPuzzle(easyPuzzle)).generate()
+        val editable = puzzle.cells.indexOf(0)
+        scenario.close()
+        GameStore(context).save(easyPuzzle, GameSession(GameState(puzzle, solution.withValue(editable, 0))))
+        scenario = ActivityScenario.launch(GameActivity.intent(context, easyPuzzle, false))
+        cell(editable).perform(click())
+        number(solution[editable]).perform(scrollTo(), click())
+        onView(withId(R.id.game_completed)).check(matches(isDisplayed()))
+        assertTrue(GameStore(context).load(easyPuzzle)!!.state.isComplete)
+    }
+
+    private fun startSelectedLevelAndEnter(value: Int): Int {
+        onView(withId(R.id.new_game)).perform(click())
+        waitForGame()
+        val editable = GameStore(context).load(homePreferences.puzzleId)!!.state.puzzle.cells.indexOf(0)
+        cell(editable).perform(click())
+        number(value).perform(scrollTo(), click())
+        return editable
+    }
+
+    private fun checkHeaderBelowStatusBar() {
+        scenario.onActivity { activity ->
+            val header = activity.findViewById<View>(R.id.game_header)
+            val position = IntArray(2)
+            header.getLocationOnScreen(position)
+            val insets = requireNotNull(ViewCompat.getRootWindowInsets(header))
+            assertTrue(position[1] >= insets.getInsets(WindowInsetsCompat.Type.statusBars()).top)
+        }
     }
 
     private fun cell(index: Int) = onView(withTagValue(equalTo("cell_$index")))

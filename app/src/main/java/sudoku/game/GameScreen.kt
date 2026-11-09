@@ -4,7 +4,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.core.view.isVisible
 import sudoku.R
-import sudoku.home.Difficulty
+import sudoku.home.label
 import com.google.android.material.button.MaterialButton
 
 class GameScreen(
@@ -21,10 +21,10 @@ class GameScreen(
     }
 
     fun bind(
-        difficulty: Difficulty, onHome: () -> Unit, onTheme: () -> Unit,
+        puzzle: PuzzleId, onHome: () -> Unit, onTheme: () -> Unit,
         onNewGame: () -> Unit, onSettings: () -> Unit,
     ) {
-        root.findViewById<TextView>(R.id.game_difficulty).setText(difficulty.label)
+        renderTitle(puzzle)
         root.findViewById<View>(R.id.back_home).setOnClickListener { onHome() }
         root.findViewById<View>(R.id.game_theme).setOnClickListener { onTheme() }
         root.findViewById<View>(R.id.restart_game).setOnClickListener { onNewGame() }
@@ -54,5 +54,12 @@ class GameScreen(
         session.action()
         render()
         onChanged()
+    }
+
+    private fun renderTitle(puzzle: PuzzleId) {
+        root.findViewById<TextView>(R.id.sample_puzzle_label).setText(R.string.unrated_puzzle)
+        root.findViewById<TextView>(R.id.game_difficulty).text = root.context.getString(
+            R.string.game_identity, root.context.getString(puzzle.difficulty.label), puzzle.level,
+        )
     }
 }

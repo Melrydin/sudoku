@@ -1,5 +1,7 @@
 package sudoku.home
 
+import sudoku.game.Difficulty
+
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView

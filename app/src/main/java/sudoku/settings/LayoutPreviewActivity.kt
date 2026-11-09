@@ -23,8 +23,8 @@ class LayoutPreviewActivity : ThemedActivity() {
         setContentView(R.layout.activity_game)
         val root = findViewById<View>(R.id.game_root)
         applySystemInsets(root)
-        val session = GameStore(this).load(preferences.difficulty) ?: GameSession(SamplePuzzle.create())
-        GameScreen(root, session, {}, { gamePreferences.options }).bind(preferences.difficulty, {}, {}, {}, {})
+        val session = GameStore(this).load(preferences.puzzleId) ?: GameSession(SamplePuzzle.create())
+        GameScreen(root, session, {}, { gamePreferences.options }).bind(preferences.puzzleId, {}, {}, {}, {})
         findViewById<TextView>(R.id.game_timer).text = PlayTimeFormatter.format(session.elapsedMillis)
         val layout = BoardLayoutController(root)
         draft = savedInstanceState?.let(::restoreDraft) ?: gamePreferences.boardLayout

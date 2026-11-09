@@ -27,12 +27,12 @@ class GameSession(initialState: GameState, history: List<GameState> = emptyList(
         state = state.copy(noteMode = !state.noteMode)
     }
 
-    fun enter(value: Int) {
+    fun enter(value: Int, autoRemoveNotes: Boolean = false) {
         require(value in 1..SudokuBoard.SIZE)
         if (!canEditSelection()) return
         if (state.noteMode) enterNote(value) else commit(state.copy(
             board = state.board.withValue(state.selectedCell, value),
-            notes = updatedNotes(emptySet()),
+            notes = GameNotes.afterEntry(state, value, autoRemoveNotes),
         ))
     }
 

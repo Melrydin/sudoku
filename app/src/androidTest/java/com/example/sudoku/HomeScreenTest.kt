@@ -84,6 +84,6 @@ class HomeScreenTest {
         onView(withText(R.string.no_best_times)).check(matches(withText(R.string.no_best_times)))
         pressBack()
         onView(withId(R.id.about)).perform(click())
-        onView(withText(R.string.about_message)).check(matches(withText(R.string.about_message)))
+        onView(withId(R.id.about_close)).check(matches(withText(R.string.close)))
     }
 }

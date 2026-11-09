@@ -32,15 +32,6 @@
         android:textColor="?attr/homeMuted"
         android:textSize="14sp" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginVertical="20dp"
-        android:gravity="center"
-        android:text="@string/about_message"
-        android:textColor="?attr/homeForeground"
-        android:textSize="16sp" />
-
     <com.google.android.material.button.MaterialButton
         android:id="@+id/about_close"
         style="@style/Widget.Sudoku.MenuButton"

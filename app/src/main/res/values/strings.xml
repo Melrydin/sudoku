@@ -72,6 +72,5 @@
     <string name="no_best_times">Noch keine Bestzeiten. Hier erscheinen später deine abgeschlossenen Spiele.</string>
     <string name="about">Über Sudoku</string>
     <string name="about_version">Version %1$s</string>
-    <string name="about_message">Ein klarer Kopf. Neun Zahlen. Dein Moment Ruhe.</string>
     <string name="close">Schließen</string>
 </resources>

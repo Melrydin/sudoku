@@ -23,7 +23,9 @@ import sudoku.ui.theme.ThemePalette
 import sudoku.ui.common.ThemedActivity
 import sudoku.ui.game.board.BoardLayoutController
 import sudoku.ui.game.result.GameOverDialog
+import sudoku.ui.game.result.VictoryActivity
 import sudoku.ui.navigation.HomeNavigation
+import sudoku.domain.statistics.GameResult
 import sudoku.ui.settings.SettingsActivity
 
 class GameActivity : ThemedActivity() {
@@ -34,6 +36,7 @@ class GameActivity : ThemedActivity() {
     private var startFresh = false
     private var gameReady = false
     private var gameOverPending = false
+    private var victoryOpened = false
     private var gameOverDialog: GameOverDialog? = null
     private lateinit var session: GameSession
     private lateinit var screen: GameScreen
@@ -62,7 +65,9 @@ class GameActivity : ThemedActivity() {
     }
 
     private fun resumeGame() {
+        session.recordAssistance(gamePreferences.options)
         screen.render()
+        if (session.state.isComplete) { showVictory(); return }
         boardLayout.apply(gamePreferences.boardLayout)
         timerDisplay.start()
     }
@@ -118,6 +123,7 @@ class GameActivity : ThemedActivity() {
     private fun bindSession(restored: GameSession) {
         if (::timerDisplay.isInitialized) timerDisplay.stop()
         session = restored
+        session.recordAssistance(gamePreferences.options)
         timer = GameTimer(session.elapsedMillis, SystemClock::elapsedRealtime)
         setContentView(R.layout.activity_game)
         bindGameViews()
@@ -146,9 +152,11 @@ class GameActivity : ThemedActivity() {
     }
 
     private fun gameChanged() {
+        session.recordAssistance(gamePreferences.options)
         timerDisplay.refresh()
         saveSession()
         if (session.isGameOver) showGameOver()
+        else if (session.state.isComplete) showVictory()
     }
 
     private fun showGameOver() {
@@ -170,6 +178,18 @@ class GameActivity : ThemedActivity() {
 
     private fun returnHome() {
         HomeNavigation.open(this, puzzle)
+    }
+
+    private fun showVictory() {
+        if (victoryOpened || isFinishing) return
+        victoryOpened = true
+        timerDisplay.stop()
+        saveSession()
+        val result = GameResult(session.id, puzzle, session.elapsedMillis,
+            session.assistancePoints, System.currentTimeMillis())
+        appContainer.bestTimes.record(result)
+        startActivity(VictoryActivity.intent(this, session.id))
+        finish()
     }
 
     private fun chooseTheme() {

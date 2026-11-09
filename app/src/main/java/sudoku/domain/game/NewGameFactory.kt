@@ -24,6 +24,7 @@ object NewGameFactory {
         require(!SudokuRules.isComplete(puzzle)) { "A new game needs editable cells." }
         val state = GameState(puzzle)
         val notes = if (prefillNotes) GameNotes.prefill(puzzle) else state.notes
-        return GameSession(state.copy(notes = notes), initialSolution = solution)
+        val assistance = if (prefillNotes) setOf(GameAssist.PREFILL_NOTES) else emptySet()
+        return GameSession(state.copy(notes = notes), initialSolution = solution, initialAssistance = assistance)
     }
 }

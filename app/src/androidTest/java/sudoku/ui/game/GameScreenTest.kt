@@ -56,13 +56,16 @@ import sudoku.domain.settings.GameOptions
 import sudoku.domain.solver.SolutionCount
 import sudoku.domain.solver.SolutionCounter
 import sudoku.testing.ScreenCapture
-import sudoku.ui.game.GameActivity
+import sudoku.testing.PreferenceSnapshot
+import sudoku.testing.finishTestActivities
+import sudoku.data.statistics.SharedPreferencesBestTimeRepository
 import sudoku.ui.home.MainActivity
 
 @RunWith(AndroidJUnit4::class)
 class GameScreenTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val games by lazy { SharedPreferencesGameRepository(context) }
+    private val bestTimesSnapshot = PreferenceSnapshot(context, "best_times")
     private val easyPuzzle = PuzzleId(Difficulty.EASY)
     private val preferences = context.getSharedPreferences("games", Context.MODE_PRIVATE)
     private var previousGames: Map<String, *> = emptyMap<String, String>()
@@ -76,6 +79,7 @@ class GameScreenTest {
 
     @Before
     fun setUp() {
+        bestTimesSnapshot.captureAndClear()
         previousGames = preferences.all.toMap()
         previousTheme = homePreferences.theme
         previousDifficulty = homePreferences.difficulty
@@ -92,6 +96,8 @@ class GameScreenTest {
     @After
     fun tearDown() {
         scenario.close()
+        finishTestActivities()
+        bestTimesSnapshot.restore()
         preferences.edit {
             clear()
             previousGames.forEach { (key, value) -> putString(key, value as String) }
@@ -320,7 +326,7 @@ class GameScreenTest {
     }
 
     @Test
-    fun completingAGeneratedPuzzleShowsTheCompletionMessage() {
+    fun completingAGeneratedPuzzleShowsVictoryAndRecordsTheTime() {
         scenario.close()
         scenario = ActivityScenario.launch(GameActivity.intent(context, easyPuzzle, true))
         waitForGame()
@@ -332,7 +338,8 @@ class GameScreenTest {
         scenario = ActivityScenario.launch(GameActivity.intent(context, easyPuzzle, false))
         cell(editable).perform(click())
         number(solution[editable]).perform(scrollTo(), click())
-        onView(withId(R.id.game_completed)).check(matches(isDisplayed()))
+        onView(withId(R.id.victory_title)).check(matches(isDisplayed()))
+        assertEquals(1, SharedPreferencesBestTimeRepository(context).forDifficulty(Difficulty.EASY).size)
         assertTrue(games.load(easyPuzzle)!!.state.isComplete)
     }
 

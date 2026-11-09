@@ -15,6 +15,7 @@ import sudoku.data.puzzle.SamplePuzzle
 import sudoku.domain.game.GameSession
 import sudoku.domain.puzzle.Difficulty
 import sudoku.domain.puzzle.PuzzleId
+import sudoku.domain.settings.GameOptions
 import sudoku.testing.PreferenceSnapshot
 
 @RunWith(AndroidJUnit4::class)
@@ -31,15 +32,18 @@ class GameFailurePersistenceTest {
     fun tearDown() = snapshot.restore()
 
     @Test
-    fun livesAndSolutionSurviveSavingAndUndo() {
+    fun livesSolutionIdentityAndAssistanceSurviveSavingAndUndo() {
         val session = GameSession(SamplePuzzle.create())
         session.select(2)
         session.enter(1)
+        session.recordAssistance(GameOptions())
         store.save(puzzle, session)
         val restored = requireNotNull(store.load(puzzle))
         restored.undo()
         assertEquals(2, restored.remainingLives)
         assertEquals(session.solution.cells, restored.solution.cells)
+        assertEquals(session.id, restored.id)
+        assertEquals(4, restored.assistancePoints)
     }
 
     @Test
@@ -70,10 +74,11 @@ class GameFailurePersistenceTest {
     @Test
     fun olderSavesReceiveThreeLivesAndAReferenceSolution() {
         val json = JSONObject(GameStateCodec.encode(GameSession(SamplePuzzle.create())))
-        listOf("solution", "mistakes").forEach { json.remove(it) }
+        listOf("solution", "mistakes", "id", "assistance").forEach { json.remove(it) }
         val restored = requireNotNull(GameStateCodec.decode(json.toString()))
         assertEquals(3, restored.remainingLives)
         assertEquals(4, restored.solution[2])
+        assertEquals(0, restored.assistancePoints)
     }
 
     @Test

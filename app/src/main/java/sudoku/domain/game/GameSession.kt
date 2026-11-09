@@ -3,6 +3,8 @@ package sudoku.domain.game
 import sudoku.domain.board.SudokuBoard
 import sudoku.domain.board.SudokuRules
 import sudoku.domain.solver.SolutionResolver
+import sudoku.domain.settings.GameOptions
+import java.util.UUID
 
 class GameSession(
     initialState: GameState,
@@ -10,7 +12,12 @@ class GameSession(
     initialElapsedMillis: Long = 0,
     initialSolution: SudokuBoard? = null,
     initialMistakes: Int = 0,
+    initialAssistance: Set<GameAssist> = emptySet(),
+    val id: String = UUID.randomUUID().toString(),
 ) {
+    private val assistance = initialAssistance.toMutableSet()
+    val usedAssistance: Set<GameAssist> get() = assistance.toSet()
+    val assistancePoints: Int get() = assistance.size
     val solution: SudokuBoard = initialSolution ?: requireNotNull(SolutionResolver().resolve(initialState.puzzle))
     var state: GameState = initialState
         private set
@@ -30,6 +37,7 @@ class GameSession(
 
     init {
         require(initialElapsedMillis >= 0)
+        require(id.isNotBlank())
         require(initialMistakes in 0..MAX_MISTAKES)
         require(SudokuRules.isComplete(solution))
         require(state.puzzle.cells.indices.all { state.puzzle[it] == 0 || state.puzzle[it] == solution[it] })
@@ -40,6 +48,11 @@ class GameSession(
         require(millis >= 0)
         if (isGameOver) return
         elapsedMillis = millis
+    }
+
+    fun recordAssistance(options: GameOptions) {
+        if (isGameOver || state.isComplete) return
+        assistance.addAll(GameAssist.active(options))
     }
 
     fun select(index: Int) {
@@ -86,6 +99,7 @@ class GameSession(
     private fun resetAfterLoss() {
         state = GameState(state.puzzle)
         history.clear()
+        assistance.clear()
         elapsedMillis = 0
     }
 

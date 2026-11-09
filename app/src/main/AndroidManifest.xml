@@ -13,6 +13,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Sudoku">
         <activity
+            android:name=".ui.game.result.VictoryActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.statistics.TimesActivity"
             android:exported="false" />
         <activity

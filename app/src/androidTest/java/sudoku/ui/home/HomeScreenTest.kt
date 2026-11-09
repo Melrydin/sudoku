@@ -22,10 +22,12 @@ import sudoku.data.preferences.AppPreferences
 import sudoku.domain.puzzle.Difficulty
 import sudoku.domain.settings.ColorTheme
 import sudoku.testing.ScreenCapture
+import sudoku.testing.PreferenceSnapshot
 
 @RunWith(AndroidJUnit4::class)
 class HomeScreenTest {
     private val preferences = AppPreferences(ApplicationProvider.getApplicationContext())
+    private val bestTimesSnapshot = PreferenceSnapshot(ApplicationProvider.getApplicationContext(), "best_times")
     private lateinit var scenario: ActivityScenario<MainActivity>
     private lateinit var previousTheme: ColorTheme
     private lateinit var previousDifficulty: Difficulty
@@ -33,6 +35,7 @@ class HomeScreenTest {
 
     @Before
     fun setUp() {
+        bestTimesSnapshot.captureAndClear()
         previousTheme = preferences.theme
         previousDifficulty = preferences.difficulty
         previousLevels = resetLevels()
@@ -44,6 +47,7 @@ class HomeScreenTest {
     @After
     fun tearDown() {
         scenario.close()
+        bestTimesSnapshot.restore()
         previousLevels.forEach { (difficulty, level) ->
             preferences.difficulty = difficulty
             preferences.level = level

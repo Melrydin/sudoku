@@ -34,6 +34,13 @@
     <string name="notes_enabled">Notizen eingeschaltet</string>
     <string name="notes_disabled">Notizen ausgeschaltet</string>
     <string name="game_completed">Geschafft. Gut gelöst!</string>
+    <string name="game_lives">Leben: %1$d/%2$d</string>
+    <string name="game_over">Game over</string>
+    <string name="game_over_message">Drei falsche Einträge. Dein Fortschritt in diesem Level wurde gelöscht.</string>
+    <string name="victory_title">Geschafft!</string>
+    <string name="victory_time_label">Deine Zeit</string>
+    <string name="assistance_points">Hilfepunkte: %1$d/%2$d</string>
+    <string name="result_rank">%1$d.</string>
     <string name="restart_title">Neues Spiel starten?</string>
     <string name="restart_message">Dein Fortschritt in diesem Rätsel wird verworfen.</string>
     <string name="cancel">Abbrechen</string>
@@ -77,11 +84,8 @@
     </plurals>
     <string name="choose_theme">Farbthema wählen</string>
     <string name="best_times">Bestzeiten</string>
-    <string name="no_best_times">Noch keine Bestzeiten. Hier erscheinen später deine abgeschlossenen Spiele.</string>
+    <string name="no_best_times">Noch keine Bestzeiten. Schließe ein Sudoku ab, um deine Zeit hier zu sehen.</string>
     <string name="about">Über Sudoku</string>
     <string name="about_version">Version %1$s</string>
     <string name="close">Schließen</string>
-    <string name="game_lives">Leben: %1$d/%2$d</string>
-    <string name="game_over">Game over</string>
-    <string name="game_over_message">Drei falsche Einträge. Dein Fortschritt in diesem Level wurde gelöscht.</string>
 </resources>

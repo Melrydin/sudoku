@@ -5,6 +5,7 @@ import org.json.JSONObject
 import sudoku.domain.board.SudokuBoard
 import sudoku.domain.game.GameSession
 import sudoku.domain.game.GameState
+import sudoku.domain.game.GameAssist
 
 object GameStateCodec {
     fun encode(session: GameSession): String = JSONObject()
@@ -12,6 +13,8 @@ object GameStateCodec {
         .put("elapsedMillis", session.elapsedMillis)
         .put("solution", session.solution.cells.joinToString(""))
         .put("mistakes", session.mistakes)
+        .put("id", session.id)
+        .put("assistance", JSONArray(session.usedAssistance.map { it.name }))
         .put("state", encodeState(session.state))
         .put("history", JSONArray().apply { session.undoHistory.forEach { put(encodeState(it)) } })
         .toString()
@@ -33,7 +36,15 @@ object GameStateCodec {
         initialElapsedMillis = json.optLong("elapsedMillis", 0),
         initialSolution = decodeSolution(json),
         initialMistakes = decodeMistakes(json),
+        initialAssistance = decodeAssistance(json),
+        id = if (json.has("id")) json.getString("id") else java.util.UUID.randomUUID().toString(),
     )
+
+    private fun decodeAssistance(json: JSONObject): Set<GameAssist> {
+        val values = if (json.has("assistance")) json.getJSONArray("assistance") else return emptySet()
+        require(values.length() <= GameAssist.entries.size)
+        return (0 until values.length()).map { GameAssist.valueOf(values.getString(it)) }.toSet()
+    }
 
     private fun decodeSolution(json: JSONObject): SudokuBoard? =
         if (json.has("solution")) SudokuBoard.parse(json.getString("solution")) else null

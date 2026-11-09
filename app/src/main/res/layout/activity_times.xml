@@ -36,56 +36,73 @@
             android:src="@drawable/ic_palette" />
     </LinearLayout>
 
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/times_scroll"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginHorizontal="32dp"
-        android:orientation="vertical"
+        android:layout_marginTop="64dp"
+        android:layout_marginBottom="16dp"
+        android:scrollbars="none"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/times_header"
-        android:layout_marginTop="120dp"
-        app:layout_constraintWidth_max="400dp">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="@string/best_times"
-            android:textColor="?attr/homeForeground"
-            android:textSize="26sp" />
+        app:layout_constraintWidth_max="440dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <ImageButton
-                android:id="@+id/times_previous"
-                style="@style/Widget.Sudoku.IconButton"
-                android:contentDescription="@string/previous_difficulty"
-                android:src="@drawable/ic_chevron_left" />
+            android:orientation="vertical">
 
             <TextView
-                android:id="@+id/times_difficulty"
-                style="@style/Widget.Sudoku.SelectorLabel" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/best_times"
+                android:textColor="?attr/homeForeground"
+                android:textSize="26sp" />
 
-            <ImageButton
-                android:id="@+id/times_next"
-                style="@style/Widget.Sudoku.IconButton"
-                android:contentDescription="@string/next_difficulty"
-                android:src="@drawable/ic_chevron_right" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/times_previous"
+                    style="@style/Widget.Sudoku.IconButton"
+                    android:contentDescription="@string/previous_difficulty"
+                    android:src="@drawable/ic_chevron_left" />
+
+                <TextView
+                    android:id="@+id/times_difficulty"
+                    style="@style/Widget.Sudoku.SelectorLabel" />
+
+                <ImageButton
+                    android:id="@+id/times_next"
+                    style="@style/Widget.Sudoku.IconButton"
+                    android:contentDescription="@string/next_difficulty"
+                    android:src="@drawable/ic_chevron_right" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/times_empty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="48dp"
+                android:gravity="center"
+                android:text="@string/no_best_times"
+                android:textColor="?attr/homeMuted"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:id="@+id/times_entries"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:orientation="vertical" />
         </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="48dp"
-            android:gravity="center"
-            android:text="@string/no_best_times"
-            android:textColor="?attr/homeMuted"
-            android:textSize="16sp" />
-    </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

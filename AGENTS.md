@@ -140,9 +140,9 @@ Record each unique game ID once; leaderboard ordering is elapsed time first, ass
 The local leaderboard includes level and difficulty and preserves previous victories when another attempt fails.
 The five difficulty values live in `domain.puzzle.Difficulty`; their Android string mapping lives in `ui.common`.
 The highest value remains `EXTREME` for save compatibility, has stable ID `expert`, and displays "Hard".
-The grading package contains technique contracts, policy, and the user's Full House implementation.
+The grading package contains technique contracts, policy, and the user's Full House and Naked Single implementations.
 All fourteen detector classes live in `domain.grading.techniques` and are registered by default.
-`FullHouseDetector` is implemented; the remaining thirteen detectors return `NotImplemented`.
+`FullHouseDetector` and `NakedSingleDetector` are implemented; the remaining twelve return `NotImplemented`.
 `SudokuUnits` provides ordered cell groups: rows, then columns, then boxes, each in reading order.
 Detectors return the first applicable step without mutating `LogicalState` or recomputing its candidates.
 Board validation only detects duplicates and completion; it must not solve puzzles.

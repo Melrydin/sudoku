@@ -6,21 +6,26 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import sudoku.data.puzzle.SamplePuzzle
+import sudoku.domain.generation.ClueRemovalResult
+import sudoku.domain.generation.ClueRemover
 import sudoku.domain.generation.GeneratorConfig
+import sudoku.domain.generation.PuzzleRandom
+import sudoku.domain.generation.SudokuGenerator
 import sudoku.domain.puzzle.Difficulty
+import sudoku.domain.puzzle.GeneratorVersion
 import sudoku.domain.puzzle.PuzzleId
 import sudoku.domain.solver.SolutionCount
 import sudoku.domain.solver.SolutionCounter
 
 class NewGameFactoryTest {
-    private val puzzle = PuzzleId(Difficulty.EASY, 42)
+    private val puzzle = PuzzleId(Difficulty.EASY, 42, GeneratorConfig.VERSION)
 
     @Test(timeout = 5000)
     fun generatedGamesArePlayableUniqueAndStartWithoutPlayerEntries() {
         val state = NewGameFactory.create(puzzle, false).state
         assertFalse(state.isComplete)
         assertFalse(state.hasEntries)
-        assertEquals(GeneratorConfig.TARGET_CLUES, state.puzzle.cells.count { it != 0 })
+        assertTrue(state.puzzle.cells.count { it != 0 } in GeneratorConfig.clueRange(puzzle.difficulty))
         assertEquals(SolutionCount.UNIQUE, SolutionCounter().count(state.puzzle))
         assertEquals(state.puzzle.cells, state.board.cells)
     }
@@ -46,6 +51,39 @@ class NewGameFactoryTest {
         val state = NewGameFactory.create(puzzle, true).state
         assertEquals(GameNotes.prefill(state.puzzle), state.notes)
         assertTrue(state.puzzle.cells.indices.filter { state.puzzle[it] != 0 }.all { state.notes[it].isEmpty() })
+    }
+
+    @Test(timeout = 30000)
+    fun allDifficultiesGenerateUniquePuzzlesWithVaryingClueCountsInTheirRange() {
+        Difficulty.entries.forEach { difficulty ->
+            val counts = (1..10).map { level ->
+                val id = puzzle.copy(difficulty = difficulty, level = level)
+                val state = NewGameFactory.create(id, false).state
+                assertEquals(expectedTarget(id), state.puzzle.cells.count { it != 0 })
+                assertEquals(SolutionCount.UNIQUE, SolutionCounter().count(state.puzzle))
+                state.puzzle.cells.count { it != 0 }
+            }
+            val range = GeneratorConfig.clueRange(difficulty)
+            assertTrue("Clue counts for $difficulty: $counts", counts.all { it in range })
+            assertTrue("Clue counts must vary for $difficulty", counts.distinct().size > 1)
+        }
+    }
+
+    @Test(timeout = 5000)
+    fun versionOneKeepsItsOriginalRandomSequenceAndFixedTarget() {
+        val legacy = puzzle.copy(version = GeneratorVersion.V1)
+        val random = PuzzleRandom.forPuzzle(legacy)
+        val solution = SudokuGenerator(random).generate()
+        val expected = ClueRemover(random = random).removeClues(solution, 36) as ClueRemovalResult.Removed
+        val session = NewGameFactory.create(legacy, false)
+        assertEquals(expected.puzzle.cells, session.state.puzzle.cells)
+        assertEquals(solution.cells, session.solution.cells)
+    }
+
+    private fun expectedTarget(puzzle: PuzzleId): Int {
+        val random = PuzzleRandom.forPuzzle(puzzle)
+        SudokuGenerator(random).generate()
+        return GeneratorConfig.targetClues(puzzle, random)
     }
 
     @Test

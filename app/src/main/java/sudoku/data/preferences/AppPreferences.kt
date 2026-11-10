@@ -2,6 +2,7 @@ package sudoku.data.preferences
 
 import android.content.Context
 import androidx.core.content.edit
+import sudoku.domain.generation.GeneratorConfig
 import sudoku.domain.puzzle.Difficulty
 import sudoku.domain.puzzle.PuzzleId
 import sudoku.domain.settings.ColorTheme
@@ -24,5 +25,5 @@ class AppPreferences(context: Context) {
             preferences.edit { putInt("level_${difficulty.id}", value) }
         }
 
-    val puzzleId: PuzzleId get() = PuzzleId(difficulty, level)
+    val puzzleId: PuzzleId get() = PuzzleId(difficulty, level, GeneratorConfig.VERSION)
 }

@@ -48,8 +48,10 @@ import sudoku.domain.game.GameNotes
 import sudoku.domain.game.GameSession
 import sudoku.domain.game.GameState
 import sudoku.domain.generation.PuzzleRandom
+import sudoku.domain.generation.GeneratorConfig
 import sudoku.domain.generation.SudokuGenerator
 import sudoku.domain.puzzle.Difficulty
+import sudoku.domain.puzzle.GeneratorVersion
 import sudoku.domain.puzzle.PuzzleId
 import sudoku.domain.settings.ColorTheme
 import sudoku.domain.settings.GameOptions
@@ -66,7 +68,7 @@ class GameScreenTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val games by lazy { SharedPreferencesGameRepository(context) }
     private val bestTimesSnapshot = PreferenceSnapshot(context, "best_times")
-    private val easyPuzzle = PuzzleId(Difficulty.EASY)
+    private val easyPuzzle = PuzzleId(Difficulty.EASY, version = GeneratorConfig.VERSION)
     private val preferences = context.getSharedPreferences("games", Context.MODE_PRIVATE)
     private var previousGames: Map<String, *> = emptyMap<String, String>()
     private lateinit var scenario: ActivityScenario<GameActivity>
@@ -194,6 +196,37 @@ class GameScreenTest {
             onView(withId(R.id.continue_game)).check(matches(isDisplayed()))
             onView(withId(R.id.continue_game)).perform(click())
             cell(editable).check(matches(withText("4")))
+            pressBack()
+        }
+    }
+
+    @Test
+    fun homeContinuesVersionOneProgressWithoutRegeneratingThePuzzle() {
+        val legacy = saveLegacyProgress()
+        val saved = requireNotNull(games.load(legacy))
+        ActivityScenario.launch(MainActivity::class.java).use {
+            onView(withId(R.id.continue_game)).perform(click())
+            cell(2).check(matches(withText("4")))
+            assertEquals(saved.id, games.load(legacy)!!.id)
+            assertEquals(saved.state.puzzle.cells, games.load(legacy)!!.state.puzzle.cells)
+            assertNull(games.load(easyPuzzle))
+            pressBack()
+        }
+    }
+
+    @Test
+    fun newGamesUseCurrentVersionAfterConfirmingOlderProgress() {
+        val legacy = saveLegacyProgress()
+        ActivityScenario.launch(MainActivity::class.java).use {
+            onView(withId(R.id.new_game)).perform(click())
+            onView(withText(R.string.cancel)).perform(click())
+            assertNull(games.load(easyPuzzle))
+            onView(withId(R.id.new_game)).perform(click())
+            onView(withText(R.string.new_game)).perform(click())
+            waitForGame()
+            val puzzle = requireNotNull(games.load(easyPuzzle)).state.puzzle
+            assertTrue(puzzle.cells.count { it != 0 } in GeneratorConfig.clueRange(Difficulty.EASY))
+            assertEquals(4, games.load(legacy)!!.state.board[2])
             pressBack()
         }
     }
@@ -350,6 +383,17 @@ class GameScreenTest {
         cell(editable).perform(click())
         number(value).perform(scrollTo(), click())
         return editable
+    }
+
+    private fun saveLegacyProgress(): PuzzleId {
+        scenario.close()
+        games.delete(easyPuzzle)
+        val legacy = easyPuzzle.copy(version = GeneratorVersion.V1)
+        val session = GameSession(SamplePuzzle.create())
+        session.select(2)
+        session.enter(4)
+        games.save(legacy, session)
+        return legacy
     }
 
     private fun checkHeaderBelowStatusBar() {

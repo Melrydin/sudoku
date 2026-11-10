@@ -8,6 +8,7 @@ import sudoku.domain.generation.GeneratorConfig
 import sudoku.domain.generation.PuzzleGenerator
 import sudoku.domain.generation.PuzzleRandom
 import sudoku.domain.generation.SudokuGenerator
+import sudoku.domain.puzzle.GeneratorVersion
 import sudoku.domain.puzzle.PuzzleId
 
 object NewGameFactory {
@@ -15,8 +16,11 @@ object NewGameFactory {
         val random = PuzzleRandom.forPuzzle(puzzle)
         val solution = SudokuGenerator(random).generate()
         val generator = PuzzleGenerator({ solution }, ClueRemover(random = random))
-        val result = generator.generate(GeneratorConfig.TARGET_CLUES)
+        val targetClues = GeneratorConfig.targetClues(puzzle, random)
+        val attempts = if (puzzle.version == GeneratorVersion.V1) 1 else GeneratorConfig.MAX_CLUE_REMOVAL_ATTEMPTS
+        val result = generator.generate(targetClues, attempts)
         check(result is ClueRemovalResult.Removed) { "Puzzle generation requires a solution counter." }
+        check(result.targetReached || puzzle.version == GeneratorVersion.V1) { "The clue target could not be reached." }
         return fromPuzzle(result.puzzle, prefillNotes, solution)
     }
 

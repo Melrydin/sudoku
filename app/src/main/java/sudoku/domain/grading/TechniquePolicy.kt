@@ -25,7 +25,7 @@ object TechniquePolicy {
     )
 
     fun rules(version: GeneratorVersion): List<TechniqueRule> = when (version) {
-        GeneratorVersion.V1 -> versionOne
+        GeneratorVersion.V1, GeneratorVersion.V2 -> versionOne
     }
 
     fun allowed(version: GeneratorVersion, difficulty: Difficulty): List<TechniqueRule> =

@@ -4,6 +4,7 @@ import android.os.Bundle
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import sudoku.R
 import sudoku.app.appContainer
+import sudoku.domain.game.findSavedPuzzle
 import sudoku.domain.puzzle.PuzzleId
 import sudoku.ui.common.ThemedActivity
 import sudoku.ui.game.GameActivity
@@ -22,13 +23,12 @@ class MainActivity : ThemedActivity() {
         if (refreshTheme()) return
         HomeScreen(
             findViewById(R.id.main), preferences, ::selectTheme, ::startNewGame,
-            { puzzle -> startActivity(GameActivity.intent(this, puzzle, false)) },
-            { puzzle -> store.load(puzzle)?.state?.isComplete == false },
+            ::continueGame, ::hasProgress,
         ).bind()
     }
 
     private fun startNewGame(puzzle: PuzzleId) {
-        val state = store.load(puzzle)?.state
+        val state = store.findSavedPuzzle(puzzle)?.let { store.load(it)?.state }
         if (state == null || !state.hasEntries || state.isComplete) openNewGame(puzzle)
         else MaterialAlertDialogBuilder(this)
             .setTitle(R.string.restart_title)
@@ -41,4 +41,12 @@ class MainActivity : ThemedActivity() {
     private fun openNewGame(puzzle: PuzzleId) {
         startActivity(GameActivity.intent(this, puzzle, true))
     }
+
+    private fun continueGame(puzzle: PuzzleId) {
+        val saved = store.findSavedPuzzle(puzzle) ?: return
+        startActivity(GameActivity.intent(this, saved, false))
+    }
+
+    private fun hasProgress(puzzle: PuzzleId): Boolean =
+        store.findSavedPuzzle(puzzle)?.let { store.load(it)?.state?.isComplete == false } == true
 }

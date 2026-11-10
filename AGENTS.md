@@ -113,10 +113,15 @@ It chooses cells with the fewest candidates, breaking ties randomly.
 `SolutionCounter.count(SudokuBoard)` distinguishes no solution, one solution, and multiple solutions.
 Its private search copies the input, uses row/column/box masks, and stops after finding two solutions.
 `ClueRemover` tries cells in seeded random order and keeps a removal only for `SolutionCount.UNIQUE`.
-Its result reports whether the clue target was reached. The initial shared target is 36 givens;
-this is not a difficulty grade. Do not start games from unchecked removals or fully solved boards.
+Its result reports whether the clue target was reached. V1 retains its original shared target of 36 givens.
+V2 selects a seeded random target from `GeneratorConfig.clueRange`: Beginner 40–45, Easy 36–39,
+Medium 32–35, Hard 28–31, and Extreme 24–27. These are generation targets, not difficulty grades.
+V2 retries clue removal up to 100 times and reports failure rather than starting with an unreached target.
+Do not start games from unchecked removals or fully solved boards.
 `PuzzleRandom` derives a fresh random stream from the fixed app seed and `PuzzleId.key` using SHA-256.
-`GeneratorVersion.V1` fixes that encoding and the current generation behavior. Version behavior changes.
+`GeneratorVersion.V1` fixes the original encoding and generation behavior; V2 adds difficulty-specific clue targets.
+New games use V2. Home resumes older saved versions when no newer save exists for the selected difficulty and level.
+Keep saved boards and generator behavior stable within each version. Version behavior changes.
 `GamePreparationModel` runs generation off the main thread, retains it across activity recreation,
 and interrupts it when cleared. Generation and solution counting must keep checking cancellation.
 `GameActivity` shows loading/retry states, starts its timer after preparation, and preserves existing saves.

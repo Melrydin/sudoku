@@ -220,7 +220,8 @@ class GameActivity : ThemedActivity() {
     private fun puzzleFromIntent(): PuzzleId {
         val difficulty = Difficulty.entries.find { it.name == intent.getStringExtra(EXTRA_DIFFICULTY) }
             ?: Difficulty.EASY
-        val version = GeneratorVersion.entries.find { it.number == intent.getIntExtra(EXTRA_VERSION, 1) }
+        val versionNumber = intent.getIntExtra(EXTRA_VERSION, GeneratorConfig.VERSION.number)
+        val version = GeneratorVersion.entries.find { it.number == versionNumber }
             ?: GeneratorConfig.VERSION
         return PuzzleId(difficulty, intent.getIntExtra(EXTRA_LEVEL, 1).coerceAtLeast(1), version)
     }

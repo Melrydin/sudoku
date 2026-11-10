@@ -58,12 +58,13 @@ Do not implement or replace the remaining difficulty-grading algorithms without 
 ## Architecture
 
 - `app`: Android application startup and the manual dependency container.
-- `domain.board`: board values, duplicate validation, and digit counts.
+- `domain.board`: board values, row/column/box cell groups, duplicate validation, and digit counts.
 - `domain.game`: game state, editing, notes, timing, new-game creation, and the repository contract.
 - `domain.puzzle`: stable puzzle identity, difficulty IDs, and generator version.
 - `domain.generation`: seeded full-board generation and uniqueness-preserving clue removal.
 - `domain.solver`: bounded solution counting and reference-solution resolution.
 - `domain.grading`: the user's logical-technique contracts and grading policy.
+- `domain.grading.techniques`: one detector file per technique; the user implements their detection algorithms.
 - `domain.settings`: platform-independent option values and color-theme identifiers.
 - `domain.common`: cancellation shared by generation and solution counting.
 - `data.game`: SharedPreferences game repository and JSON encoding.
@@ -139,6 +140,10 @@ Record each unique game ID once; leaderboard ordering is elapsed time first, ass
 The local leaderboard includes level and difficulty and preserves previous victories when another attempt fails.
 The five difficulty values live in `domain.puzzle.Difficulty`; their Android string mapping lives in `ui.common`.
 The highest value remains `EXTREME` for save compatibility, has stable ID `expert`, and displays "Hard".
-The grading package contains technique contracts and policy; its algorithms remain unimplemented.
+The grading package contains technique contracts, policy, and the user's Full House implementation.
+All fourteen detector classes live in `domain.grading.techniques` and are registered by default.
+`FullHouseDetector` is implemented; the remaining thirteen detectors return `NotImplemented`.
+`SudokuUnits` provides ordered cell groups: rows, then columns, then boxes, each in reading order.
+Detectors return the first applicable step without mutating `LogicalState` or recomputing its candidates.
 Board validation only detects duplicates and completion; it must not solve puzzles.
 The next algorithm milestone is technique-based difficulty grading, implemented by the user.

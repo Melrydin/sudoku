@@ -1,9 +1,10 @@
 package sudoku.domain.grading
 
+import sudoku.domain.grading.techniques.defaultTechniqueDetectors
 import sudoku.domain.puzzle.Difficulty
 import sudoku.domain.puzzle.GeneratorVersion
 
-class TechniqueRegistry(detectors: List<TechniqueDetector> = emptyList()) {
+class TechniqueRegistry(detectors: List<TechniqueDetector> = defaultTechniqueDetectors()) {
     private val byTechnique = detectors.associateBy { it.technique }
 
     init {

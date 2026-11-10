@@ -2,11 +2,26 @@ package sudoku.domain.grading
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import sudoku.domain.board.SudokuBoard
+import sudoku.domain.grading.techniques.FullHouseDetector
+import sudoku.domain.grading.techniques.defaultTechniqueDetectors
 import sudoku.domain.puzzle.GeneratorVersion
 
 class TechniqueRegistryTest {
+    @Test
+    fun defaultsRegisterEveryTechniqueAndUsePolicyOrderForEachVersion() {
+        val registered = defaultTechniqueDetectors()
+        assertEquals(SolvingTechnique.entries.size, registered.size)
+        assertEquals(SolvingTechnique.entries.toSet(), registered.map { it.technique }.toSet())
+        GeneratorVersion.entries.forEach { version ->
+            val ordered = TechniqueRegistry().ordered(version)
+            assertTrue(ordered.first() is FullHouseDetector)
+            assertEquals(TechniquePolicy.rules(version).map { it.technique }, ordered.map { it.technique })
+        }
+    }
+
     @Test
     fun injectedDetectorsFollowPolicyOrderRatherThanRegistrationOrder() {
         val fullHouse = detector(SolvingTechnique.FULL_HOUSE)

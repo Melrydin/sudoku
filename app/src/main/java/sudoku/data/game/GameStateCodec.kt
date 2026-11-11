@@ -15,6 +15,7 @@ object GameStateCodec {
         .put("mistakes", session.mistakes)
         .put("id", session.id)
         .put("assistance", JSONArray(session.usedAssistance.map { it.name }))
+        .put("prefillNotesEnabled", session.prefillNotesEnabled)
         .put("state", encodeState(session.state))
         .put("history", JSONArray().apply { session.undoHistory.forEach { put(encodeState(it)) } })
         .toString()
@@ -30,15 +31,19 @@ object GameStateCodec {
         restoreSession(json, state, snapshots)
     }.getOrNull()
 
-    private fun restoreSession(json: JSONObject, state: GameState, history: List<GameState>): GameSession = GameSession(
-        initialState = state,
-        history = history,
-        initialElapsedMillis = json.optLong("elapsedMillis", 0),
-        initialSolution = decodeSolution(json),
-        initialMistakes = decodeMistakes(json),
-        initialAssistance = decodeAssistance(json),
-        id = if (json.has("id")) json.getString("id") else java.util.UUID.randomUUID().toString(),
-    )
+    private fun restoreSession(json: JSONObject, state: GameState, history: List<GameState>): GameSession {
+        val assistance = decodeAssistance(json)
+        return GameSession(
+            initialState = state,
+            history = history,
+            initialElapsedMillis = json.optLong("elapsedMillis", 0),
+            initialSolution = decodeSolution(json),
+            initialMistakes = decodeMistakes(json),
+            initialAssistance = assistance,
+            id = if (json.has("id")) json.getString("id") else java.util.UUID.randomUUID().toString(),
+            initialPrefillNotesEnabled = json.optBoolean("prefillNotesEnabled", GameAssist.PREFILL_NOTES in assistance),
+        )
+    }
 
     private fun decodeAssistance(json: JSONObject): Set<GameAssist> {
         val values = if (json.has("assistance")) json.getJSONArray("assistance") else return emptySet()

@@ -29,6 +29,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withTagValue
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.hamcrest.Matchers.allOf
+import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.equalTo
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -264,7 +265,7 @@ class GameScreenTest {
     }
 
     @Test
-    fun prefillingOnlyAffectsNewGamesAndSurvivesRecreation() {
+    fun newGamePrefillingPreservesNoteChangesAcrossRecreation() {
         gamePreferences.options = GameOptions(prefillNotes = true)
         scenario.close()
         scenario = ActivityScenario.launch(GameActivity.intent(context, easyPuzzle, true))
@@ -277,6 +278,34 @@ class GameScreenTest {
         onView(withId(R.id.erase)).perform(scrollTo(), click())
         scenario.recreate()
         assertTrue(store.load(easyPuzzle)!!.state.notes[editable].isEmpty())
+    }
+
+    @Test
+    fun enablingPrefillInSettingsUpdatesTheRunningGameAndSupportsUndo() {
+        cell(2).perform(click())
+        number(4).perform(scrollTo(), click())
+        val before = games.load(easyPuzzle)!!.state
+        togglePrefillInSettings()
+        cell(2).check(matches(withText("4")))
+        cell(3).check(matches(withContentDescription(containsString(context.getString(R.string.cell_notes, "2, 6")))))
+        checkSavedState(before.copy(notes = GameNotes.prefill(before.board)))
+        onView(withId(R.id.undo)).perform(scrollTo(), click())
+        checkSavedState(before)
+        scenario.recreate()
+        checkSavedState(before)
+    }
+
+    @Test
+    fun existingGamesPrefillWhenResumedAfterEnablingTheOptionAtHome() {
+        cell(2).perform(click())
+        number(4).perform(scrollTo(), click())
+        scenario.close()
+        gamePreferences.options = gamePreferences.options.copy(prefillNotes = true)
+        scenario = ActivityScenario.launch(GameActivity.intent(context, easyPuzzle, false))
+        val state = games.load(easyPuzzle)!!.state
+        assertEquals(4, state.board[2])
+        assertEquals(GameNotes.prefill(state.board), state.notes)
+        cell(3).check(matches(withContentDescription(containsString(context.getString(R.string.cell_notes, "2, 6")))))
     }
 
     @Test
@@ -383,6 +412,24 @@ class GameScreenTest {
         cell(editable).perform(click())
         number(value).perform(scrollTo(), click())
         return editable
+    }
+
+    private fun togglePrefillInSettings() {
+        onView(withId(R.id.game_settings)).perform(scrollTo(), click())
+        onView(withId(R.id.settings_assists)).perform(scrollTo(), click())
+        onView(allOf(withId(R.id.setting_toggle), isDescendantOfA(withId(R.id.setting_prefill))))
+            .perform(scrollTo(), click())
+        pressBack()
+        pressBack()
+    }
+
+    private fun checkSavedState(expected: GameState) {
+        val actual = games.load(easyPuzzle)!!.state
+        assertEquals(expected.puzzle.cells, actual.puzzle.cells)
+        assertEquals(expected.board.cells, actual.board.cells)
+        assertEquals(expected.notes, actual.notes)
+        assertEquals(expected.selectedCell, actual.selectedCell)
+        assertEquals(expected.noteMode, actual.noteMode)
     }
 
     private fun saveLegacyProgress(): PuzzleId {

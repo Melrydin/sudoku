@@ -74,7 +74,7 @@
     <string name="setting_remaining">Verbleibende Anzahl anzeigen</string>
     <string name="setting_prefill">Notizen vorfüllen</string>
     <string name="setting_prefill_summary">
-        Neue Spiele starten mit allen in Zeile, Spalte und Block möglichen Notizen.
+        Füllt beim Einschalten und in neuen Spielen alle in Zeile, Spalte und Block möglichen Notizen vor.
     </string>
     <string name="setting_remove_notes">Notizen automatisch entfernen</string>
     <string name="setting_hide_digits">Vollständige Ziffern ausblenden</string>

@@ -65,7 +65,8 @@ class GameActivity : ThemedActivity() {
     }
 
     private fun resumeGame() {
-        session.recordAssistance(gamePreferences.options)
+        session.applyOptions(gamePreferences.options)
+        saveSession()
         screen.render()
         if (session.state.isComplete) { showVictory(); return }
         boardLayout.apply(gamePreferences.boardLayout)
@@ -123,7 +124,7 @@ class GameActivity : ThemedActivity() {
     private fun bindSession(restored: GameSession) {
         if (::timerDisplay.isInitialized) timerDisplay.stop()
         session = restored
-        session.recordAssistance(gamePreferences.options)
+        session.applyOptions(gamePreferences.options)
         timer = GameTimer(session.elapsedMillis, SystemClock::elapsedRealtime)
         setContentView(R.layout.activity_game)
         bindGameViews()

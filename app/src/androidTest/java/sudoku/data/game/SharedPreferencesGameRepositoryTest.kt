@@ -14,6 +14,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import sudoku.data.puzzle.SamplePuzzle
 import sudoku.domain.game.GameSession
+import sudoku.domain.settings.GameOptions
 import sudoku.domain.puzzle.Difficulty
 import sudoku.domain.puzzle.PuzzleId
 
@@ -84,6 +85,35 @@ class SharedPreferencesGameRepositoryTest {
             putString(Difficulty.EASY.name, GameStateCodec.encode(editedGame(1, 0)))
         }
         assertNull(store.load(first))
+    }
+
+    @Test
+    fun restoredPrefillSettingPreservesManualChangesAndAllowsReenabling() {
+        val game = GameSession(SamplePuzzle.create())
+        val options = GameOptions(prefillNotes = true)
+        game.applyOptions(options)
+        game.select(2)
+        game.erase()
+        val restored = requireNotNull(GameStateCodec.decode(GameStateCodec.encode(game)))
+        restored.applyOptions(options)
+        assertTrue(restored.state.notes[2].isEmpty())
+        restored.applyOptions(options.copy(prefillNotes = false))
+        val disabled = requireNotNull(GameStateCodec.decode(GameStateCodec.encode(restored)))
+        disabled.applyOptions(options)
+        assertEquals(setOf(1, 2, 4), disabled.state.notes[2])
+    }
+
+    @Test
+    fun olderPrefilledSavesPreserveManualNoteChanges() {
+        val game = GameSession(SamplePuzzle.create())
+        val options = GameOptions(prefillNotes = true)
+        game.applyOptions(options)
+        game.select(2)
+        game.erase()
+        val legacy = org.json.JSONObject(GameStateCodec.encode(game)).apply { remove("prefillNotesEnabled") }
+        val restored = requireNotNull(GameStateCodec.decode(legacy.toString()))
+        restored.applyOptions(options)
+        assertTrue(restored.state.notes[2].isEmpty())
     }
 
     private fun editedGame(digit: Int, elapsed: Long): GameSession = GameSession(SamplePuzzle.create()).apply {

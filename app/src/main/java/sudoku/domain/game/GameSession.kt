@@ -14,10 +14,13 @@ class GameSession(
     initialMistakes: Int = 0,
     initialAssistance: Set<GameAssist> = emptySet(),
     val id: String = UUID.randomUUID().toString(),
+    initialPrefillNotesEnabled: Boolean = GameAssist.PREFILL_NOTES in initialAssistance,
 ) {
     private val assistance = initialAssistance.toMutableSet()
     val usedAssistance: Set<GameAssist> get() = assistance.toSet()
     val assistancePoints: Int get() = assistance.size
+    var prefillNotesEnabled: Boolean = initialPrefillNotesEnabled
+        private set
     val solution: SudokuBoard = initialSolution ?: requireNotNull(SolutionResolver().resolve(initialState.puzzle))
     var state: GameState = initialState
         private set
@@ -53,6 +56,15 @@ class GameSession(
     fun recordAssistance(options: GameOptions) {
         if (isGameOver || state.isComplete) return
         assistance.addAll(GameAssist.active(options))
+    }
+
+    fun applyOptions(options: GameOptions) {
+        if (isGameOver || state.isComplete) return
+        if (options.prefillNotes && !prefillNotesEnabled) {
+            commit(state.copy(notes = GameNotes.prefill(state.board)))
+        }
+        prefillNotesEnabled = options.prefillNotes
+        recordAssistance(options)
     }
 
     fun select(index: Int) {

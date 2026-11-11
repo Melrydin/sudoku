@@ -106,6 +106,20 @@ Do not implement or replace the remaining difficulty-grading algorithms without 
 - Run Espresso tests with system animations temporarily disabled and restore their original values afterward.
 - Report what was verified and any checks that could not run.
 
+## How the work goes
+
+- **Trunk based.** Every commit goes straight to `main` in small focused steps. No
+  feature branch, no pull request — not even "to be safe". CI on `main` is the safety
+  net. Should more contributors join, the branch and pull request workflow returns.
+- **Commit only when asked.** Conventional commits (`feat`, `fix`, `refactor`, `perf`,
+  `style`, `test`, `docs`, `build`, `ops`, `chore`, optional scope, imperative,
+  lowercase, no trailing dot). Every commit ends with the Claude co-author trailer.
+- **Never push.** Clemens pushes himself, always. Do not run `git push`, do not offer
+  it, do not ask whether it should happen, and do not mention it as an open step when
+  reporting on a commit.
+- A code change and a documentation update are **separate commits** — the fix as
+  `fix(...)`, the document as `docs(...)`.
+
 ## Next milestone
 
 New games use `NewGameFactory` and `PuzzleGenerator`; saved games still load their original puzzle.

@@ -8,7 +8,6 @@ Communicate with the user in German.
 Use Sudoku - The Clean One by Dustland Design as the visual and navigation reference:
 https://play.google.com/store/apps/details?id=ee.dustland.android.dustlandsudoku
 The user owns the core algorithms unless they explicitly request implementation.
-The solution counter and generator integration were explicitly requested and are implemented.
 Do not implement or replace the remaining difficulty-grading algorithms without a new request.
 
 ## Coding rules
@@ -38,22 +37,28 @@ Do not implement or replace the remaining difficulty-grading algorithms without 
 - Offer five difficulty levels and persist the selected difficulty and color theme.
 - Let the player select a puzzle level within each difficulty and persist that selection.
 - Draw original vector assets rather than bundling assets from the reference app.
-
-## Initial playable scope
-
-- Display a valid Sudoku puzzle with fixed starting numbers.
-- Let the player select an editable cell, enter a number from 1 to 9, and erase an entry.
-- Prevent changes to starting numbers.
-- Validate rows, columns, and boxes and recognize a correctly completed puzzle.
-- Allow starting a new game; confirm before discarding an unfinished game with player entries.
-- Preserve the active puzzle and player entries across activity recreation and app restarts.
-- Support manual notes, undo, conflict highlighting, and saved progress per puzzle version, difficulty, and level.
-- Generate uniquely solvable puzzles for new games and preserve saved sample games.
-- Label generated puzzles as ungraded until the technique-based difficulty analyzer is implemented.
-- Track active play time per game. Pause in the background and after completion; persist elapsed time.
 - Keep the adaptive launcher icon consistent with the home screen's Sudoku symbol and Aurum colors.
-- Defer hints and technique-based difficulty grading.
-- Generate puzzles in the background and retain in-flight work across activity recreation.
+
+## Gameplay rules
+
+- Keep givens immutable; support digit entry, erase, manual notes, undo, and conflict highlighting.
+  Board validation detects row/column/box duplicates and completion; it must not solve puzzles.
+- Confirm before discarding unfinished games with player entries. Restart retains the starting puzzle
+  and resets entries, notes, history, time, lives, and assistance.
+- Persist progress per puzzle version, difficulty, and level across activity recreation and app restarts,
+  including the reference solution, mistakes, game ID, and activated assistance. Preserve saved sample games.
+- Each game has three lives. Every wrong number submission costs one, including repeats;
+  notes, givens, erase, and undo neither cost lives nor refund them.
+- The third mistake clears state/history/time, deletes only that puzzle's current and applicable legacy save,
+  and shows a non-cancellable game-over dialog before returning home. Never save failed sessions again.
+- Older saves retain their original puzzle, resolve its solution, and start with three lives
+  without retroactive penalties.
+- Count each of the five activated assistance options once per game, even after disabling it;
+  freeze the score on completion.
+- Persist active play time; pause in the background and after completion. Show time and assistance points on victory.
+- Record each game ID once. Rank victories by elapsed time, then assistance points; include difficulty and level.
+  Preserve previous victories when another attempt fails.
+- Hints remain out of scope for now.
 
 ## Architecture
 
@@ -120,45 +125,31 @@ Do not implement or replace the remaining difficulty-grading algorithms without 
 - A code change and a documentation update are **separate commits** — the fix as
   `fix(...)`, the document as `docs(...)`.
 
-## Next milestone
+## Generation and grading rules
 
-New games use `NewGameFactory` and `PuzzleGenerator`; saved games still load their original puzzle.
-`SudokuGenerator.generate()` fills an empty board using seeded randomness and an explicit decision stack.
-It chooses cells with the fewest candidates, breaking ties randomly.
-`SolutionCounter.count(SudokuBoard)` distinguishes no solution, one solution, and multiple solutions.
-Its private search copies the input, uses row/column/box masks, and stops after finding two solutions.
-`ClueRemover` tries cells in seeded random order and keeps a removal only for `SolutionCount.UNIQUE`.
-Its result reports whether the clue target was reached. V1 retains its original shared target of 36 givens.
-V2 selects a seeded random target from `GeneratorConfig.clueRange`: Beginner 40–45, Easy 36–39,
-Medium 32–35, Hard 28–31, and Extreme 24–27. These are generation targets, not difficulty grades.
-V2 retries clue removal up to 100 times and reports failure rather than starting with an unreached target.
-Do not start games from unchecked removals or fully solved boards.
-`PuzzleRandom` derives a fresh random stream from the fixed app seed and `PuzzleId.key` using SHA-256.
-`GeneratorVersion.V1` fixes the original encoding and generation behavior; V2 adds difficulty-specific clue targets.
-New games use V2. Home resumes older saved versions when no newer save exists for the selected difficulty and level.
-Keep saved boards and generator behavior stable within each version. Version behavior changes.
-`GamePreparationModel` runs generation off the main thread, retains it across activity recreation,
-and interrupts it when cleared. Generation and solution counting must keep checking cancellation.
-`GameActivity` shows loading/retry states, starts its timer after preparation, and preserves existing saves.
-Each game has three lives and a persisted reference solution. Wrong number submissions cost one life,
-including repeated submissions; notes, givens, erase, and undo do not cost lives or refund lost lives.
-The third mistake resets state/history/time, deletes only that puzzle's current and applicable legacy save,
-and shows a non-cancellable game-over dialog before returning home. Failed sessions must never be saved again.
-`GameStateCodec` retains the solution, mistakes, game ID, and activated assistance across restarts;
-older saves resolve the original puzzle and start with three lives without retroactive penalties.
-Restarting a level clears entries, notes, history, time, lives, and assistance while retaining its starting puzzle.
-Each of the five activated assistance options contributes one point, at most once per game (0–5).
-Previously recorded assistance remains counted after switching it off. Freeze the score on completion.
-A completed game opens `VictoryActivity` with recorded active play time and assistance points.
-Record each unique game ID once; leaderboard ordering is elapsed time first, assistance points as a tie-breaker.
-The local leaderboard includes level and difficulty and preserves previous victories when another attempt fails.
-The five difficulty values live in `domain.puzzle.Difficulty`; their Android string mapping lives in `ui.common`.
-The highest value remains `EXTREME` for save compatibility, has stable ID `expert`, and displays "Hard".
-The grading package contains technique contracts, policy, and the user's implemented detectors.
-All fourteen detector classes live in `domain.grading.techniques` and are registered by default.
-`FullHouseDetector`, `NakedSingleDetector`, `HiddenSingleDetector`, and `LockedCandidatesPointingDetector` are implemented.
-The remaining ten detectors return `NotImplemented`.
-`SudokuUnits` provides ordered cell groups: rows, then columns, then boxes, each in reading order.
-Detectors return the first applicable step without mutating `LogicalState` or recomputing its candidates.
-Board validation only detects duplicates and completion; it must not solve puzzles.
-The next algorithm milestone is technique-based difficulty grading, implemented by the user.
+- Keep saved boards and deterministic generator behavior stable within each version;
+  behavior changes require a new version.
+- New games use V2; resume older saved versions when no newer save exists for the selected difficulty and level.
+- Only start uniquely solvable, incomplete puzzles. V2 must reach its clue target or report failure.
+  Clue counts are generation targets, not difficulty grades; `GeneratorConfig` defines their ranges and retry limit.
+- Generate off the main thread, retain in-flight work across activity recreation, and cancel it when cleared.
+  Generation and solution counting must check cancellation; start the timer only after preparation.
+- Keep generated puzzles labeled as ungraded until technique-based grading is integrated.
+- Keep difficulty enum names and IDs stable: `EXTREME` has ID `expert` and displays "Hard".
+  Resolve Android difficulty labels in `ui.common`.
+- Keep all fourteen detectors registered. `SudokuUnits` orders rows, then columns, then boxes, each in reading order.
+  Return the first effective step without mutating `LogicalState` or recomputing candidates.
+
+## Open milestones
+
+Technique-based difficulty grading is the current algorithm milestone; the user implements its algorithms.
+Six detectors are implemented and tested: Full House, Naked Single, Hidden Single,
+Locked Candidates Pointing, Locked Candidates Claiming, and Naked Pair.
+
+1. Implement and test Hidden Pair next.
+2. Implement and test the remaining detectors: Naked Triple, Hidden Triple, X-Wing, Naked Quad,
+   Hidden Quad, Swordfish, and XY-Wing. These seven and Hidden Pair currently return `NotImplemented`.
+3. Implement and test `DifficultyAnalyzer`: initialize candidates once, apply effective steps,
+   restart technique priority after each step, and grade solved boards by the highest technique tier used.
+   Preserve candidate eliminations and return `Unrated` when solving stalls; the analyzer is currently a placeholder.
+4. Integrate grading into puzzle generation and the UI while preserving generator-version and save compatibility.

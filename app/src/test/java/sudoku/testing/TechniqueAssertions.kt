@@ -22,6 +22,16 @@ class TechniqueAssertions(private val detector: TechniqueDetector, private val t
         assertEquals(TechniqueSearchResult.NotFound, findWithoutChangingInput(state))
     }
 
+    fun assertEliminations(state: LogicalState, expected: Map<Int, Set<Int>>) {
+        val result = findWithoutChangingInput(state)
+        assertTrue("Expected eliminations, got $result", result is TechniqueSearchResult.Found)
+        val step = (result as TechniqueSearchResult.Found).step
+        assertEquals(technique, step.technique)
+        assertEquals(expected, step.eliminations)
+        assertTrue(step.placements.isEmpty())
+        assertTrue(step.isApplicableTo(state))
+    }
+
     private fun findWithoutChangingInput(state: LogicalState): TechniqueSearchResult {
         val boardBefore = state.board.cells.toList()
         val candidatesBefore = state.candidates.map { it.toSet() }

@@ -113,7 +113,7 @@ Do not implement or replace the remaining difficulty-grading algorithms without 
   net. Should more contributors join, the branch and pull request workflow returns.
 - **Commit only when asked.** Conventional commits (`feat`, `fix`, `refactor`, `perf`,
   `style`, `test`, `docs`, `build`, `ops`, `chore`, optional scope, imperative,
-  lowercase, no trailing dot). Every commit ends with the Claude co-author trailer.
+  lowercase, no trailing dot).
 - **Never push.** Clemens pushes himself, always. Do not run `git push`, do not offer
   it, do not ask whether it should happen, and do not mention it as an open step when
   reporting on a commit.

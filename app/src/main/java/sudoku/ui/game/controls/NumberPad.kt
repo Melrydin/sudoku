@@ -7,8 +7,8 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
 import android.widget.GridLayout
 import androidx.core.graphics.ColorUtils
-import androidx.core.view.isInvisible
 import androidx.core.view.children
+import androidx.core.view.isInvisible
 import com.google.android.material.button.MaterialButton
 import sudoku.R
 import sudoku.domain.board.DigitCounts
@@ -32,9 +32,10 @@ class NumberPad(private val root: GridLayout, private val onNumber: (Int) -> Uni
             val digit = root.context.formatNumber(index + 1)
             button.isInvisible = options.hideCompletedDigits && remaining == 0
             button.text = if (options.showRemainingCount) countedLabel(digit, remaining) else digit
-            button.contentDescription = if (options.showRemainingCount) root.resources.getQuantityString(
-                R.plurals.enter_number_remaining, remaining, digit, remaining,
-            ) else root.context.getString(R.string.enter_number, digit)
+            button.contentDescription =
+                if (options.showRemainingCount) root.resources.getQuantityString(
+                    R.plurals.enter_number_remaining, remaining, digit, remaining,
+                ) else root.context.getString(R.string.enter_number, digit)
         }
     }
 
@@ -61,7 +62,10 @@ class NumberPad(private val root: GridLayout, private val onNumber: (Int) -> Uni
 
     private fun eraseButton(onErase: () -> Unit): MaterialButton = button().apply {
         id = R.id.erase
-        icon = androidx.appcompat.content.res.AppCompatResources.getDrawable(context, R.drawable.ic_erase)
+        icon = androidx.appcompat.content.res.AppCompatResources.getDrawable(
+            context,
+            R.drawable.ic_erase
+        )
         iconSize = (26 * resources.displayMetrics.density).toInt()
         iconTint = android.content.res.ColorStateList.valueOf(colors.foreground)
         iconGravity = MaterialButton.ICON_GRAVITY_TEXT_START
@@ -81,7 +85,12 @@ class NumberPad(private val root: GridLayout, private val onNumber: (Int) -> Uni
         strokeWidth = resources.displayMetrics.density.toInt().coerceAtLeast(1)
         strokeColor = android.content.res.ColorStateList.valueOf(colors.outline)
         backgroundTintList = android.content.res.ColorStateList.valueOf(colors.background)
-        rippleColor = android.content.res.ColorStateList.valueOf(ColorUtils.setAlphaComponent(colors.accent, 70))
+        rippleColor = android.content.res.ColorStateList.valueOf(
+            ColorUtils.setAlphaComponent(
+                colors.accent,
+                70
+            )
+        )
         setTextColor(colors.foreground)
         textSize = 25f
     }

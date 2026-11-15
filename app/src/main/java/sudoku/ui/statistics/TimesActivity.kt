@@ -5,10 +5,9 @@ import android.view.View
 import android.widget.TextView
 import sudoku.R
 import sudoku.app.appContainer
-import sudoku.ui.common.label
-import sudoku.domain.puzzle.Difficulty
-import sudoku.ui.theme.ThemePalette
 import sudoku.ui.common.ThemedActivity
+import sudoku.ui.common.label
+import sudoku.ui.theme.ThemePalette
 
 class TimesActivity : ThemedActivity() {
     private lateinit var screen: BestTimesScreen

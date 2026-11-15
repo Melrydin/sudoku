@@ -1,6 +1,5 @@
 package sudoku.domain.generation
 
-import kotlin.random.Random
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
@@ -9,6 +8,7 @@ import org.junit.Test
 import sudoku.domain.board.SudokuBoard
 import sudoku.domain.solver.SolutionCount
 import sudoku.fixtures.TestBoards
+import kotlin.random.Random
 
 class ClueRemoverTest {
     private val solution = TestBoards.solved()
@@ -62,8 +62,10 @@ class ClueRemoverTest {
     fun freshSeededRemoversRepeatTheSameRemovalOrder() {
         val first = ClueRemover({ SolutionCount.UNIQUE }, Random(42)).removeClues(solution, 60)
         val second = ClueRemover({ SolutionCount.UNIQUE }, Random(42)).removeClues(solution, 60)
-        assertEquals((first as ClueRemovalResult.Removed).puzzle.cells,
-            (second as ClueRemovalResult.Removed).puzzle.cells)
+        assertEquals(
+            (first as ClueRemovalResult.Removed).puzzle.cells,
+            (second as ClueRemovalResult.Removed).puzzle.cells
+        )
     }
 
     @Test
@@ -77,7 +79,12 @@ class ClueRemoverTest {
     @Test
     fun rejectsIncompleteSolutionsAndInvalidTargets() {
         val remover = ClueRemover()
-        assertThrows(IllegalArgumentException::class.java) { remover.removeClues(SudokuBoard.empty(), 30) }
+        assertThrows(IllegalArgumentException::class.java) {
+            remover.removeClues(
+                SudokuBoard.empty(),
+                30
+            )
+        }
         assertThrows(IllegalArgumentException::class.java) { remover.removeClues(solution, -1) }
         assertThrows(IllegalArgumentException::class.java) { remover.removeClues(solution, 82) }
     }

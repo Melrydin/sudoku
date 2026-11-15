@@ -39,6 +39,7 @@ class LockedCandidatesClaimingDetector : TechniqueDetector {
         val box = SudokuUnits.boxes.singleOrNull { box ->
             candidateCells.all { cell -> cell in box }
         }
-        return box?.filter { cell -> cell !in line }?.filter { cell -> digit in state.candidates[cell] }.orEmpty()
+        return box?.filter { cell -> cell !in line }
+            ?.filter { cell -> digit in state.candidates[cell] }.orEmpty()
     }
 }

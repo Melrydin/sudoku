@@ -44,7 +44,10 @@ class FullHouseDetectorTest {
             val cell = unit.first()
             val original = LogicalStates.fullHouse(unit to cell)
             val board = original.board.withValue(unit[2], original.board[unit[1]])
-            val state = LogicalStates.withCandidates(LogicalState.from(board), cell to original.candidates[cell])
+            val state = LogicalStates.withCandidates(
+                LogicalState.from(board),
+                cell to original.candidates[cell]
+            )
             checks.assertNotFound(state)
         }
     }
@@ -64,13 +67,17 @@ class FullHouseDetectorTest {
 
     @Test
     fun searchesRowsBeforeColumns() {
-        val state = LogicalStates.fullHouse(SudokuUnits.rows.last() to 80, SudokuUnits.columns.first() to 0)
+        val state =
+            LogicalStates.fullHouse(SudokuUnits.rows.last() to 80, SudokuUnits.columns.first() to 0)
         checks.assertPlacement(state, 80, TestBoards.solved()[80])
     }
 
     @Test
     fun searchesColumnsBeforeBoxes() {
-        val state = LogicalStates.fullHouse(SudokuUnits.columns.last() to 80, SudokuUnits.boxes.first() to 0)
+        val state = LogicalStates.fullHouse(
+            SudokuUnits.columns.last() to 80,
+            SudokuUnits.boxes.first() to 0
+        )
         checks.assertPlacement(state, 80, TestBoards.solved()[80])
     }
 }

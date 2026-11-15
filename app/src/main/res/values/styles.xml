@@ -1,4 +1,5 @@
 <resources>
+
     <style name="Widget.Sudoku.LayoutLabel" parent="Widget.AppCompat.TextView">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
@@ -14,6 +15,7 @@
         <item name="android:layout_marginBottom">12dp</item>
         <item name="labelBehavior">gone</item>
     </style>
+
     <style name="Widget.Sudoku.MenuButton" parent="Widget.Material3.Button.OutlinedButton">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">52dp</item>
@@ -32,6 +34,7 @@
         <item name="iconTint">?attr/homeForeground</item>
         <item name="iconPadding">16dp</item>
     </style>
+
     <style name="Widget.Sudoku.IconButton" parent="Widget.AppCompat.ImageButton">
         <item name="android:layout_width">56dp</item>
         <item name="android:layout_height">56dp</item>
@@ -50,6 +53,7 @@
         <item name="android:textSize">18sp</item>
         <item name="android:accessibilityLiveRegion">polite</item>
     </style>
+
     <style name="Widget.Sudoku.ToolButton" parent="Widget.Material3.Button.TextButton">
         <item name="android:layout_width">56dp</item>
         <item name="android:layout_height">56dp</item>

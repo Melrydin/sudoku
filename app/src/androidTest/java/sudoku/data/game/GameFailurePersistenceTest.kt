@@ -60,11 +60,13 @@ class GameFailurePersistenceTest {
 
     @Test
     fun deletingTheCurrentLevelAlsoPreventsLegacyResurrection() {
-        val preferences = context.getSharedPreferences("games", android.content.Context.MODE_PRIVATE)
+        val preferences =
+            context.getSharedPreferences("games", android.content.Context.MODE_PRIVATE)
         val other = puzzle.copy(level = 2)
         store.save(puzzle, GameSession(SamplePuzzle.create()))
         store.save(other, GameSession(SamplePuzzle.create()))
-        preferences.edit().putString(Difficulty.EASY.name, GameStateCodec.encode(store.load(other)!!)).commit()
+        preferences.edit()
+            .putString(Difficulty.EASY.name, GameStateCodec.encode(store.load(other)!!)).commit()
         store.delete(puzzle)
         assertNull(store.load(puzzle))
         assertFalse(preferences.contains(Difficulty.EASY.name))

@@ -22,8 +22,14 @@ internal object GameResultCodec {
         val json = JSONObject(encoded)
         require(json.getInt("version") == 1)
         val difficulty = Difficulty.entries.first { it.id == json.getString("difficulty") }
-        val version = GeneratorVersion.entries.first { it.number == json.getInt("generatorVersion") }
-        GameResult(json.getString("gameId"), PuzzleId(difficulty, json.getInt("level"), version),
-            json.getLong("elapsedMillis"), json.getInt("assistancePoints"), json.getLong("finishedAt"))
+        val version =
+            GeneratorVersion.entries.first { it.number == json.getInt("generatorVersion") }
+        GameResult(
+            json.getString("gameId"),
+            PuzzleId(difficulty, json.getInt("level"), version),
+            json.getLong("elapsedMillis"),
+            json.getInt("assistancePoints"),
+            json.getLong("finishedAt")
+        )
     }.getOrNull()
 }

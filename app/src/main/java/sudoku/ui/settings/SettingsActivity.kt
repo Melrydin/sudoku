@@ -7,9 +7,9 @@ import androidx.activity.OnBackPressedCallback
 import androidx.core.widget.NestedScrollView
 import sudoku.R
 import sudoku.app.appContainer
-import sudoku.ui.theme.ThemePalette
 import sudoku.ui.common.ThemedActivity
 import sudoku.ui.settings.layout.LayoutPreviewActivity
+import sudoku.ui.theme.ThemePalette
 
 class SettingsActivity : ThemedActivity() {
     private lateinit var screen: SettingsScreen
@@ -20,9 +20,18 @@ class SettingsActivity : ThemedActivity() {
         setContentView(R.layout.activity_settings)
         val root = findViewById<View>(R.id.settings_root)
         applySystemInsets(root)
-        section = SettingsSection.entries.find { it.name == savedInstanceState?.getString("section") } ?: section
+        section =
+            SettingsSection.entries.find { it.name == savedInstanceState?.getString("section") }
+                ?: section
         screen = SettingsScreen(root, appContainer.gamePreferences)
-        screen.bind(::showSection) { startActivity(Intent(this, LayoutPreviewActivity::class.java)) }
+        screen.bind(::showSection) {
+            startActivity(
+                Intent(
+                    this,
+                    LayoutPreviewActivity::class.java
+                )
+            )
+        }
         screen.render(section)
         findViewById<View>(R.id.settings_back).setOnClickListener { goBack() }
         findViewById<View>(R.id.settings_theme).setOnClickListener {

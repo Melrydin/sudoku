@@ -34,7 +34,11 @@ class SudokuUnitsTest {
         repeat(SudokuBoard.CELL_COUNT) { first ->
             repeat(SudokuBoard.CELL_COUNT) { second ->
                 val shareUnit = SudokuUnits.all.any { first in it && second in it }
-                assertEquals("Cells $first and $second", SudokuRules.arePeers(first, second), shareUnit)
+                assertEquals(
+                    "Cells $first and $second",
+                    SudokuRules.arePeers(first, second),
+                    shareUnit
+                )
             }
         }
     }

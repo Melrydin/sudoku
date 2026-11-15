@@ -104,10 +104,15 @@ class LockedCandidatesClaimingDetectorTest {
     private fun checkPatterns(box: List<Int>, line: List<Int>) {
         val cells = line.filter { it in box }
         if (cells.size != SudokuBoard.BOX_SIZE) return
-        val groups = listOf(cells.take(2), cells.takeLast(2), listOf(cells.first(), cells.last()), cells)
+        val groups =
+            listOf(cells.take(2), cells.takeLast(2), listOf(cells.first(), cells.last()), cells)
         for (matching in groups) {
             for (digit in 1..SudokuBoard.SIZE) {
-                assertEliminations(pattern(line, matching, digit), (box - line.toSet()).toSet(), digit)
+                assertEliminations(
+                    pattern(line, matching, digit),
+                    (box - line.toSet()).toSet(),
+                    digit
+                )
             }
         }
     }
@@ -131,7 +136,8 @@ class LockedCandidatesClaimingDetectorTest {
         matching: List<Int>,
         digit: Int,
         excluded: Set<Int> = emptySet(),
-    ): LogicalState = restrict(LogicalState.from(SudokuBoard.empty()), line, matching, digit, excluded)
+    ): LogicalState =
+        restrict(LogicalState.from(SudokuBoard.empty()), line, matching, digit, excluded)
 
     private fun restrict(
         state: LogicalState,

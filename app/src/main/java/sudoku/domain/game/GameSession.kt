@@ -2,8 +2,8 @@ package sudoku.domain.game
 
 import sudoku.domain.board.SudokuBoard
 import sudoku.domain.board.SudokuRules
-import sudoku.domain.solver.SolutionResolver
 import sudoku.domain.settings.GameOptions
+import sudoku.domain.solver.SolutionResolver
 import java.util.UUID
 
 class GameSession(
@@ -21,7 +21,8 @@ class GameSession(
     val assistancePoints: Int get() = assistance.size
     var prefillNotesEnabled: Boolean = initialPrefillNotesEnabled
         private set
-    val solution: SudokuBoard = initialSolution ?: requireNotNull(SolutionResolver().resolve(initialState.puzzle))
+    val solution: SudokuBoard =
+        initialSolution ?: requireNotNull(SolutionResolver().resolve(initialState.puzzle))
     var state: GameState = initialState
         private set
     private val history = ArrayDeque(history)
@@ -85,10 +86,12 @@ class GameSession(
     }
 
     private fun enterDigit(value: Int, autoRemoveNotes: Boolean) {
-        commit(state.copy(
-            board = state.board.withValue(state.selectedCell, value),
-            notes = GameNotes.afterEntry(state, value, autoRemoveNotes),
-        ))
+        commit(
+            state.copy(
+                board = state.board.withValue(state.selectedCell, value),
+                notes = GameNotes.afterEntry(state, value, autoRemoveNotes),
+            )
+        )
         if (value != solution[state.selectedCell]) {
             mistakes++
             if (isGameOver) resetAfterLoss()
@@ -97,12 +100,18 @@ class GameSession(
 
     fun erase() {
         if (!canEditSelection()) return
-        commit(state.copy(board = state.board.withValue(state.selectedCell, 0), notes = updatedNotes(emptySet())))
+        commit(
+            state.copy(
+                board = state.board.withValue(state.selectedCell, 0),
+                notes = updatedNotes(emptySet())
+            )
+        )
     }
 
     fun undo() {
         if (!canUndo) return
-        state = history.removeLast().copy(selectedCell = state.selectedCell, noteMode = state.noteMode)
+        state =
+            history.removeLast().copy(selectedCell = state.selectedCell, noteMode = state.noteMode)
     }
 
     private fun canEditSelection(): Boolean =

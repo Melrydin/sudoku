@@ -18,7 +18,9 @@ class TechniqueRegistryTest {
         GeneratorVersion.entries.forEach { version ->
             val ordered = TechniqueRegistry().ordered(version)
             assertTrue(ordered.first() is FullHouseDetector)
-            assertEquals(TechniquePolicy.rules(version).map { it.technique }, ordered.map { it.technique })
+            assertEquals(
+                TechniquePolicy.rules(version).map { it.technique },
+                ordered.map { it.technique })
         }
     }
 
@@ -30,17 +32,26 @@ class TechniqueRegistryTest {
         val ordered = registry.ordered(GeneratorVersion.V1)
         assertSame(fullHouse, ordered.first())
         assertSame(xWing, ordered.single { it.technique == SolvingTechnique.X_WING })
-        assertEquals(TechniqueSearchResult.NotFound, fullHouse.findStep(LogicalState.from(SudokuBoard.empty())))
+        assertEquals(
+            TechniqueSearchResult.NotFound,
+            fullHouse.findStep(LogicalState.from(SudokuBoard.empty()))
+        )
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun rejectsDuplicateImplementationsOfTheSameTechnique() {
-        TechniqueRegistry(listOf(detector(SolvingTechnique.FULL_HOUSE), detector(SolvingTechnique.FULL_HOUSE)))
+        TechniqueRegistry(
+            listOf(
+                detector(SolvingTechnique.FULL_HOUSE),
+                detector(SolvingTechnique.FULL_HOUSE)
+            )
+        )
     }
 
     private fun detector(kind: SolvingTechnique): TechniqueDetector = object : TechniqueDetector {
         override val technique: SolvingTechnique = kind
 
-        override fun findStep(state: LogicalState): TechniqueSearchResult = TechniqueSearchResult.NotFound
+        override fun findStep(state: LogicalState): TechniqueSearchResult =
+            TechniqueSearchResult.NotFound
     }
 }

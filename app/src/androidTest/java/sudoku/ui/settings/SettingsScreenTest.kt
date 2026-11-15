@@ -45,7 +45,11 @@ class SettingsScreenTest {
 
     @Test
     fun individualSettingsSurviveRecreationWithoutChangingOtherSwitches() {
-        listOf(R.id.setting_highlight, R.id.setting_prefill, R.id.setting_hide_digits).forEach(::toggle)
+        listOf(
+            R.id.setting_highlight,
+            R.id.setting_prefill,
+            R.id.setting_hide_digits
+        ).forEach(::toggle)
         scenario.recreate()
         checkToggle(R.id.setting_highlight, false)
         checkToggle(R.id.setting_remaining, true)
@@ -53,7 +57,11 @@ class SettingsScreenTest {
         checkToggle(R.id.setting_remove_notes, true)
         checkToggle(R.id.setting_hide_digits, false)
         val restored = GamePreferences(ApplicationProvider.getApplicationContext()).options
-        val expected = GameOptions(highlightSameDigits = false, prefillNotes = true, hideCompletedDigits = false)
+        val expected = GameOptions(
+            highlightSameDigits = false,
+            prefillNotes = true,
+            hideCompletedDigits = false
+        )
         assertEquals(expected, restored)
         reopenSection(R.id.settings_assists)
         ScreenCapture.capture("settings-assists.png")
@@ -61,8 +69,10 @@ class SettingsScreenTest {
 
     @Test
     fun everyOptionCanBeDisabledAndEnabledIndependently() {
-        val rows = listOf(R.id.setting_highlight, R.id.setting_remaining, R.id.setting_prefill,
-            R.id.setting_remove_notes, R.id.setting_hide_digits)
+        val rows = listOf(
+            R.id.setting_highlight, R.id.setting_remaining, R.id.setting_prefill,
+            R.id.setting_remove_notes, R.id.setting_hide_digits
+        )
         rows.forEach(::toggle)
         assertEquals(GameOptions(false, false, true, false, false), preferences.options)
         rows.forEach(::toggle)
@@ -74,11 +84,15 @@ class SettingsScreenTest {
         pressBack()
         ScreenCapture.capture("settings-menu.png")
         onView(withId(R.id.settings_gameplay)).perform(scrollTo(), click())
-        listOf(R.id.setting_animations, R.id.setting_timer, R.id.setting_circles,
-            R.id.setting_double_tap, R.id.setting_hold).forEach(::toggle)
+        listOf(
+            R.id.setting_animations, R.id.setting_timer, R.id.setting_circles,
+            R.id.setting_double_tap, R.id.setting_hold
+        ).forEach(::toggle)
         scenario.recreate()
-        val expected = GameOptions(boardAnimations = false, showTimer = false, circleGivens = true,
-            doubleTapErase = true, holdToErase = true)
+        val expected = GameOptions(
+            boardAnimations = false, showTimer = false, circleGivens = true,
+            doubleTapErase = true, holdToErase = true
+        )
         assertEquals(expected, preferences.options)
         checkToggle(R.id.setting_timer, false)
         checkToggle(R.id.setting_circles, true)
@@ -88,7 +102,10 @@ class SettingsScreenTest {
     }
 
     private fun toggle(id: Int) {
-        onView(allOf(withId(R.id.setting_toggle), isDescendantOfA(withId(id)))).perform(scrollTo(), click())
+        onView(allOf(withId(R.id.setting_toggle), isDescendantOfA(withId(id)))).perform(
+            scrollTo(),
+            click()
+        )
     }
 
     private fun reopenSection(id: Int) {

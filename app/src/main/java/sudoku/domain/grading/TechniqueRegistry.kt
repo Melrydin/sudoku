@@ -20,5 +20,6 @@ class TechniqueRegistry(detectors: List<TechniqueDetector> = defaultTechniqueDet
 }
 
 private class PendingTechnique(override val technique: SolvingTechnique) : TechniqueDetector {
-    override fun findStep(state: LogicalState): TechniqueSearchResult = TechniqueSearchResult.NotImplemented
+    override fun findStep(state: LogicalState): TechniqueSearchResult =
+        TechniqueSearchResult.NotImplemented
 }

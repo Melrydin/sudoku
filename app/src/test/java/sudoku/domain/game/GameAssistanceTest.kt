@@ -27,7 +27,13 @@ class GameAssistanceTest {
 
     @Test
     fun visualGameplayOptionsAreNotScoredAsAssistance() {
-        session.recordAssistance(disabled.copy(boardAnimations = true, showTimer = true, circleGivens = true))
+        session.recordAssistance(
+            disabled.copy(
+                boardAnimations = true,
+                showTimer = true,
+                circleGivens = true
+            )
+        )
         assertEquals(0, session.assistancePoints)
     }
 

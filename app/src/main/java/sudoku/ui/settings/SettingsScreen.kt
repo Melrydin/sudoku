@@ -11,8 +11,10 @@ import sudoku.data.preferences.GamePreferences
 
 class SettingsScreen(private val root: View, private val preferences: GamePreferences) {
     fun bind(onSection: (SettingsSection) -> Unit, onLayout: () -> Unit) {
-        root.findViewById<View>(R.id.settings_assists).setOnClickListener { onSection(SettingsSection.ASSISTS) }
-        root.findViewById<View>(R.id.settings_gameplay).setOnClickListener { onSection(SettingsSection.GAMEPLAY) }
+        root.findViewById<View>(R.id.settings_assists)
+            .setOnClickListener { onSection(SettingsSection.ASSISTS) }
+        root.findViewById<View>(R.id.settings_gameplay)
+            .setOnClickListener { onSection(SettingsSection.GAMEPLAY) }
         root.findViewById<View>(R.id.settings_layout).setOnClickListener { onLayout() }
     }
 
@@ -22,7 +24,8 @@ class SettingsScreen(private val root: View, private val preferences: GamePrefer
         val options = root.findViewById<LinearLayout>(R.id.settings_options)
         options.removeAllViews()
         GameSetting.entries.filter { it.section == section }.forEach { setting ->
-            val row = LayoutInflater.from(root.context).inflate(R.layout.setting_toggle, options, false)
+            val row =
+                LayoutInflater.from(root.context).inflate(R.layout.setting_toggle, options, false)
             bindToggle(row, setting)
             options.addView(row)
         }

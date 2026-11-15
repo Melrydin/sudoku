@@ -67,7 +67,8 @@ internal class SolutionSearch(board: SudokuBoard) {
     }
 
     private fun availableMask(cell: Int): Int {
-        val used = rows[cell / SudokuBoard.SIZE] or columns[cell % SudokuBoard.SIZE] or boxes[boxIndex(cell)]
+        val used =
+            rows[cell / SudokuBoard.SIZE] or columns[cell % SudokuBoard.SIZE] or boxes[boxIndex(cell)]
         return ALL_DIGITS and used.inv()
     }
 
@@ -84,7 +85,7 @@ internal class SolutionSearch(board: SudokuBoard) {
 
     private fun boxIndex(cell: Int): Int =
         cell / SudokuBoard.SIZE / SudokuBoard.BOX_SIZE * SudokuBoard.BOX_SIZE +
-            cell % SudokuBoard.SIZE / SudokuBoard.BOX_SIZE
+                cell % SudokuBoard.SIZE / SudokuBoard.BOX_SIZE
 
     companion object {
         private const val ALL_DIGITS: Int = (1 shl (SudokuBoard.SIZE + 1)) - 2

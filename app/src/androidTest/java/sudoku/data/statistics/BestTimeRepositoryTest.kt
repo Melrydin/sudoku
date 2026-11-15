@@ -61,7 +61,8 @@ class BestTimeRepositoryTest {
 
     @Test
     fun malformedResultsAreIgnoredWithoutHidingValidRecords() {
-        context.getSharedPreferences("best_times", Context.MODE_PRIVATE).edit().putString("broken", "oops").commit()
+        context.getSharedPreferences("best_times", Context.MODE_PRIVATE).edit()
+            .putString("broken", "oops").commit()
         store.record(result("valid", 20_000, 1))
         assertNull(store.find("broken"))
         assertEquals(listOf("valid"), store.forDifficulty(Difficulty.EASY).map { it.gameId })

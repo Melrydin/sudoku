@@ -30,7 +30,11 @@ class SudokuBoardView @JvmOverloads constructor(context: Context, attrs: Attribu
         cells.forEach(::addView)
     }
 
-    fun render(state: GameState, options: GameOptions = GameOptions(), incorrectCells: Set<Int>? = null) {
+    fun render(
+        state: GameState,
+        options: GameOptions = GameOptions(),
+        incorrectCells: Set<Int>? = null
+    ) {
         val conflicts = incorrectCells ?: SudokuRules.conflicts(state.board)
         cells.forEach { it.render(state, conflicts, options) }
     }
@@ -50,18 +54,30 @@ class SudokuBoardView @JvmOverloads constructor(context: Context, attrs: Attribu
         ViewCompat.setAccessibilityDelegate(this, cellAccessibility(index))
     }
 
-    private fun cellAccessibility(index: Int): AccessibilityDelegateCompat = object : AccessibilityDelegateCompat() {
-        override fun onInitializeAccessibilityNodeInfo(host: android.view.View, info: AccessibilityNodeInfoCompat) {
-            super.onInitializeAccessibilityNodeInfo(host, info)
-            info.setCollectionItemInfo(AccessibilityNodeInfoCompat.CollectionItemInfoCompat.obtain(
-                index / SudokuBoard.SIZE, 1, index % SudokuBoard.SIZE, 1, false, host.isSelected,
-            ))
+    private fun cellAccessibility(index: Int): AccessibilityDelegateCompat =
+        object : AccessibilityDelegateCompat() {
+            override fun onInitializeAccessibilityNodeInfo(
+                host: android.view.View,
+                info: AccessibilityNodeInfoCompat
+            ) {
+                super.onInitializeAccessibilityNodeInfo(host, info)
+                info.setCollectionItemInfo(
+                    AccessibilityNodeInfoCompat.CollectionItemInfoCompat.obtain(
+                        index / SudokuBoard.SIZE,
+                        1,
+                        index % SudokuBoard.SIZE,
+                        1,
+                        false,
+                        host.isSelected,
+                    )
+                )
+            }
         }
-    }
 
     private fun drawGridLine(canvas: Canvas, line: Int) {
         val major = line % SudokuBoard.BOX_SIZE == 0
-        gridPaint.color = if (major) colors.accent else ColorUtils.setAlphaComponent(colors.outline, 110)
+        gridPaint.color =
+            if (major) colors.accent else ColorUtils.setAlphaComponent(colors.outline, 110)
         gridPaint.strokeWidth = resources.displayMetrics.density * if (major) 1.4f else 0.5f
         if (major) {
             canvas.drawLine(line * width / 9f, 0f, line * width / 9f, height.toFloat(), gridPaint)
@@ -73,10 +89,14 @@ class SudokuBoardView @JvmOverloads constructor(context: Context, attrs: Attribu
         val cellWidth = width / 9f
         val cellHeight = height / 9f
         for (cell in 0 until SudokuBoard.SIZE) {
-            canvas.drawLine(line * cellWidth, (cell + 0.2f) * cellHeight,
-                line * cellWidth, (cell + 0.8f) * cellHeight, gridPaint)
-            canvas.drawLine((cell + 0.2f) * cellWidth, line * cellHeight,
-                (cell + 0.8f) * cellWidth, line * cellHeight, gridPaint)
+            canvas.drawLine(
+                line * cellWidth, (cell + 0.2f) * cellHeight,
+                line * cellWidth, (cell + 0.8f) * cellHeight, gridPaint
+            )
+            canvas.drawLine(
+                (cell + 0.2f) * cellWidth, line * cellHeight,
+                (cell + 0.8f) * cellWidth, line * cellHeight, gridPaint
+            )
         }
     }
 }

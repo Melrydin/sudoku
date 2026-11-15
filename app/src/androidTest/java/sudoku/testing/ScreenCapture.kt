@@ -15,10 +15,12 @@ object ScreenCapture {
     fun save(name: String, bitmap: Bitmap) {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val arguments = InstrumentationRegistry.getArguments()
-        val path = arguments.getString("additionalTestOutputDir") ?: instrumentation.targetContext.cacheDir.path
+        val path = arguments.getString("additionalTestOutputDir")
+            ?: instrumentation.targetContext.cacheDir.path
         val directory = File(path)
         directory.mkdirs()
-        File(directory, name).outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        File(directory, name).outputStream()
+            .use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         bitmap.recycle()
     }
 }

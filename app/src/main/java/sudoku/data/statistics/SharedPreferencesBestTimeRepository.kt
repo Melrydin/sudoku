@@ -20,5 +20,6 @@ class SharedPreferencesBestTimeRepository(context: Context) : BestTimeRepository
     override fun forDifficulty(difficulty: Difficulty): List<GameResult> = preferences.all.values
         .mapNotNull { (it as? String)?.let(GameResultCodec::decode) }
         .filter { it.puzzle.difficulty == difficulty }
-        .sortedWith(compareBy<GameResult> { it.elapsedMillis }.thenBy { it.assistancePoints }.thenBy { it.finishedAt })
+        .sortedWith(compareBy<GameResult> { it.elapsedMillis }.thenBy { it.assistancePoints }
+            .thenBy { it.finishedAt })
 }

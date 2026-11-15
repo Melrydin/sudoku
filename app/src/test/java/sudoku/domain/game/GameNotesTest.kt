@@ -14,7 +14,8 @@ class GameNotesTest {
         val state = SamplePuzzle.create()
         val notes = GameNotes.prefill(state.board)
         assertEquals(setOf(1, 2, 4), notes[2])
-        assertTrue(state.board.cells.indices.filter { state.board[it] != 0 }.all { notes[it].isEmpty() })
+        assertTrue(state.board.cells.indices.filter { state.board[it] != 0 }
+            .all { notes[it].isEmpty() })
         assertFalse(state.hasEntries)
     }
 
@@ -61,14 +62,20 @@ class GameNotesTest {
         session.enter(1, autoRemoveNotes = true)
         assertFalse(session.canUndo)
         assertEquals(5, session.state.board[0])
-        val completed = GameSession(GameState(TestBoards.empty(), TestBoards.solved(), selectedCell = 0))
+        val completed =
+            GameSession(GameState(TestBoards.empty(), TestBoards.solved(), selectedCell = 0))
         completed.enter(1, autoRemoveNotes = true)
         assertFalse(completed.canUndo)
     }
 
     private fun notedState(): GameState = GameState(
         puzzle = TestBoards.empty(),
-        notes = List(SudokuBoard.CELL_COUNT) { if (it in listOf(0, 8, 72, 10, 40)) setOf(1, 2) else emptySet() },
+        notes = List(SudokuBoard.CELL_COUNT) {
+            if (it in listOf(0, 8, 72, 10, 40)) setOf(
+                1,
+                2
+            ) else emptySet()
+        },
         selectedCell = 0,
     )
 }

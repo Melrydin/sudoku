@@ -7,7 +7,10 @@ import sudoku.domain.grading.SolvingTechnique
 import sudoku.domain.grading.TechniqueDetector
 import sudoku.domain.grading.TechniqueSearchResult
 
-class TechniqueAssertions(private val detector: TechniqueDetector, private val technique: SolvingTechnique) {
+class TechniqueAssertions(
+    private val detector: TechniqueDetector,
+    private val technique: SolvingTechnique
+) {
     fun assertPlacement(state: LogicalState, cell: Int, digit: Int) {
         val result = findWithoutChangingInput(state)
         assertTrue("Expected a placement, got $result", result is TechniqueSearchResult.Found)

@@ -9,12 +9,21 @@ import sudoku.fixtures.TestBoards
 class GradingResultTest {
     @Test(expected = IllegalArgumentException::class)
     fun anIncompleteBoardCannotBeClassifiedAsGraded() {
-        GradingResult.Graded(Difficulty.BEGINNER, SudokuBoard.empty(),
-            listOf(LogicalStep(SolvingTechnique.NAKED_SINGLE, placements = mapOf(0 to 5))), GeneratorVersion.V1)
+        GradingResult.Graded(
+            Difficulty.BEGINNER,
+            SudokuBoard.empty(),
+            listOf(LogicalStep(SolvingTechnique.NAKED_SINGLE, placements = mapOf(0 to 5))),
+            GeneratorVersion.V1
+        )
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun gradingRequiresARecordedStep() {
-        GradingResult.Graded(Difficulty.BEGINNER, TestBoards.solved(), emptyList(), GeneratorVersion.V1)
+        GradingResult.Graded(
+            Difficulty.BEGINNER,
+            TestBoards.solved(),
+            emptyList(),
+            GeneratorVersion.V1
+        )
     }
 }

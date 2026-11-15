@@ -14,9 +14,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import sudoku.data.puzzle.SamplePuzzle
 import sudoku.domain.game.GameSession
-import sudoku.domain.settings.GameOptions
 import sudoku.domain.puzzle.Difficulty
 import sudoku.domain.puzzle.PuzzleId
+import sudoku.domain.settings.GameOptions
 
 @RunWith(AndroidJUnit4::class)
 class SharedPreferencesGameRepositoryTest {
@@ -56,7 +56,12 @@ class SharedPreferencesGameRepositoryTest {
 
     @Test
     fun legacyProgressIsMigratedOnlyIntoVersionOneLevelOne() {
-        preferences.edit { putString(Difficulty.EASY.name, GameStateCodec.encode(editedGame(4, 1_200))) }
+        preferences.edit {
+            putString(
+                Difficulty.EASY.name,
+                GameStateCodec.encode(editedGame(4, 1_200))
+            )
+        }
         assertNull(store.load(PuzzleId(Difficulty.EASY, 2)))
         assertTrue(preferences.contains(Difficulty.EASY.name))
         val first = PuzzleId(Difficulty.EASY, 1)
@@ -73,7 +78,12 @@ class SharedPreferencesGameRepositoryTest {
     fun existingLevelProgressIsNeverOverwrittenByLegacyData() {
         val first = PuzzleId(Difficulty.EASY, 1)
         store.save(first, editedGame(4, 0))
-        preferences.edit { putString(Difficulty.EASY.name, GameStateCodec.encode(editedGame(1, 0))) }
+        preferences.edit {
+            putString(
+                Difficulty.EASY.name,
+                GameStateCodec.encode(editedGame(1, 0))
+            )
+        }
         assertEquals(4, store.load(first)!!.state.board[2])
     }
 
@@ -110,18 +120,20 @@ class SharedPreferencesGameRepositoryTest {
         game.applyOptions(options)
         game.select(2)
         game.erase()
-        val legacy = org.json.JSONObject(GameStateCodec.encode(game)).apply { remove("prefillNotesEnabled") }
+        val legacy =
+            org.json.JSONObject(GameStateCodec.encode(game)).apply { remove("prefillNotesEnabled") }
         val restored = requireNotNull(GameStateCodec.decode(legacy.toString()))
         restored.applyOptions(options)
         assertTrue(restored.state.notes[2].isEmpty())
     }
 
-    private fun editedGame(digit: Int, elapsed: Long): GameSession = GameSession(SamplePuzzle.create()).apply {
-        select(2)
-        enter(digit)
-        select(3)
-        toggleNotes()
-        enter(6)
-        trackElapsedTime(elapsed)
-    }
+    private fun editedGame(digit: Int, elapsed: Long): GameSession =
+        GameSession(SamplePuzzle.create()).apply {
+            select(2)
+            enter(digit)
+            select(3)
+            toggleNotes()
+            enter(6)
+            trackElapsedTime(elapsed)
+        }
 }

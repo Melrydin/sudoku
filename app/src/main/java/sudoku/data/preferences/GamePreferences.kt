@@ -12,11 +12,20 @@ class GamePreferences(context: Context) {
 
     var options: GameOptions
         get() = GameOptions(
-            highlightSameDigits = preferences.getBoolean("highlight_same_digits", defaults.highlightSameDigits),
-            showRemainingCount = preferences.getBoolean("show_remaining_count", defaults.showRemainingCount),
+            highlightSameDigits = preferences.getBoolean(
+                "highlight_same_digits",
+                defaults.highlightSameDigits
+            ),
+            showRemainingCount = preferences.getBoolean(
+                "show_remaining_count",
+                defaults.showRemainingCount
+            ),
             prefillNotes = preferences.getBoolean("prefill_notes", defaults.prefillNotes),
             autoRemoveNotes = preferences.getBoolean("auto_remove_notes", defaults.autoRemoveNotes),
-            hideCompletedDigits = preferences.getBoolean("hide_completed_digits", defaults.hideCompletedDigits),
+            hideCompletedDigits = preferences.getBoolean(
+                "hide_completed_digits",
+                defaults.hideCompletedDigits
+            ),
             boardAnimations = preferences.getBoolean("board_animations", defaults.boardAnimations),
             showTimer = preferences.getBoolean("show_timer", defaults.showTimer),
             circleGivens = preferences.getBoolean("circle_givens", defaults.circleGivens),
@@ -40,7 +49,8 @@ class GamePreferences(context: Context) {
         get() = BoardLayoutOptions(
             preferences.getFloat("board_width", layoutDefaults.widthFraction).coerceIn(0.6f, 1f),
             preferences.getFloat("board_vertical", layoutDefaults.verticalBias).coerceIn(0f, 1f),
-            preferences.getFloat("board_horizontal", layoutDefaults.horizontalBias).coerceIn(0f, 1f),
+            preferences.getFloat("board_horizontal", layoutDefaults.horizontalBias)
+                .coerceIn(0f, 1f),
         )
         set(value) = preferences.edit {
             putFloat("board_width", value.widthFraction)

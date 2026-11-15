@@ -12,8 +12,10 @@ object HomeNavigation {
             difficulty = puzzle.difficulty
             level = puzzle.level
         }
-        activity.startActivity(Intent(activity, MainActivity::class.java)
-            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP))
+        activity.startActivity(
+            Intent(activity, MainActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        )
         activity.finish()
     }
 }

@@ -3,9 +3,9 @@ package sudoku.data.game
 import org.json.JSONArray
 import org.json.JSONObject
 import sudoku.domain.board.SudokuBoard
+import sudoku.domain.game.GameAssist
 import sudoku.domain.game.GameSession
 import sudoku.domain.game.GameState
-import sudoku.domain.game.GameAssist
 
 object GameStateCodec {
     fun encode(session: GameSession): String = JSONObject()
@@ -31,7 +31,11 @@ object GameStateCodec {
         restoreSession(json, state, snapshots)
     }.getOrNull()
 
-    private fun restoreSession(json: JSONObject, state: GameState, history: List<GameState>): GameSession {
+    private fun restoreSession(
+        json: JSONObject,
+        state: GameState,
+        history: List<GameState>
+    ): GameSession {
         val assistance = decodeAssistance(json)
         return GameSession(
             initialState = state,
@@ -40,13 +44,18 @@ object GameStateCodec {
             initialSolution = decodeSolution(json),
             initialMistakes = decodeMistakes(json),
             initialAssistance = assistance,
-            id = if (json.has("id")) json.getString("id") else java.util.UUID.randomUUID().toString(),
-            initialPrefillNotesEnabled = json.optBoolean("prefillNotesEnabled", GameAssist.PREFILL_NOTES in assistance),
+            id = if (json.has("id")) json.getString("id") else java.util.UUID.randomUUID()
+                .toString(),
+            initialPrefillNotesEnabled = json.optBoolean(
+                "prefillNotesEnabled",
+                GameAssist.PREFILL_NOTES in assistance
+            ),
         )
     }
 
     private fun decodeAssistance(json: JSONObject): Set<GameAssist> {
-        val values = if (json.has("assistance")) json.getJSONArray("assistance") else return emptySet()
+        val values =
+            if (json.has("assistance")) json.getJSONArray("assistance") else return emptySet()
         require(values.length() <= GameAssist.entries.size)
         return (0 until values.length()).map { GameAssist.valueOf(values.getString(it)) }.toSet()
     }
@@ -54,14 +63,17 @@ object GameStateCodec {
     private fun decodeSolution(json: JSONObject): SudokuBoard? =
         if (json.has("solution")) SudokuBoard.parse(json.getString("solution")) else null
 
-    private fun decodeMistakes(json: JSONObject): Int = if (json.has("mistakes")) json.getInt("mistakes") else 0
+    private fun decodeMistakes(json: JSONObject): Int =
+        if (json.has("mistakes")) json.getInt("mistakes") else 0
 
     private fun encodeState(state: GameState): JSONObject = JSONObject()
         .put("puzzle", state.puzzle.cells.joinToString(""))
         .put("board", state.board.cells.joinToString(""))
         .put("selected", state.selectedCell)
         .put("noteMode", state.noteMode)
-        .put("notes", JSONArray().apply { state.notes.forEach { put(it.sorted().joinToString("")) } })
+        .put(
+            "notes",
+            JSONArray().apply { state.notes.forEach { put(it.sorted().joinToString("")) } })
 
     private fun decodeState(json: JSONObject): GameState {
         val notes = json.getJSONArray("notes")

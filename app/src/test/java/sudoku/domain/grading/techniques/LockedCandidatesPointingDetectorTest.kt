@@ -33,9 +33,18 @@ class LockedCandidatesPointingDetectorTest {
     fun returnsNotFoundWithoutAnAlignedPatternOrEffectiveEliminations() {
         val box = SudokuUnits.boxes.first()
         val outside = (SudokuUnits.rows.first() - box.toSet()).toSet()
-        assertEquals(TechniqueSearchResult.NotFound, detector.findStep(LogicalState.from(SudokuBoard.empty())))
-        assertEquals(TechniqueSearchResult.NotFound, detector.findStep(pattern(box, listOf(0, 10, 20), 5)))
-        assertEquals(TechniqueSearchResult.NotFound, detector.findStep(pattern(box, listOf(0, 1), 5, outside)))
+        assertEquals(
+            TechniqueSearchResult.NotFound,
+            detector.findStep(LogicalState.from(SudokuBoard.empty()))
+        )
+        assertEquals(
+            TechniqueSearchResult.NotFound,
+            detector.findStep(pattern(box, listOf(0, 10, 20), 5))
+        )
+        assertEquals(
+            TechniqueSearchResult.NotFound,
+            detector.findStep(pattern(box, listOf(0, 1), 5, outside))
+        )
     }
 
     @Test
@@ -86,7 +95,8 @@ class LockedCandidatesPointingDetectorTest {
         matching: List<Int>,
         digit: Int,
         excluded: Set<Int> = emptySet(),
-    ): LogicalState = restrict(LogicalState.from(SudokuBoard.empty()), box, matching, digit, excluded)
+    ): LogicalState =
+        restrict(LogicalState.from(SudokuBoard.empty()), box, matching, digit, excluded)
 
     private fun restrict(
         state: LogicalState,

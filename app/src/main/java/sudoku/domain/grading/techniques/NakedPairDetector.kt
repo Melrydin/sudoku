@@ -21,11 +21,11 @@ class NakedPairDetector : TechniqueDetector {
                     if (eliminations.isEmpty()) continue
 
                     return TechniqueSearchResult.Found(
-                            LogicalStep(
-                                technique,
-                                eliminations = eliminations
-                            )
+                        LogicalStep(
+                            technique,
+                            eliminations = eliminations
                         )
+                    )
                 }
             }
 
@@ -59,7 +59,11 @@ class NakedPairDetector : TechniqueDetector {
         return emptyList()
     }
 
-    private fun findEliminations(unit: List<Int>, pair: List<Int>, state: LogicalState): Map<Int, Set<Int>> {
+    private fun findEliminations(
+        unit: List<Int>,
+        pair: List<Int>,
+        state: LogicalState
+    ): Map<Int, Set<Int>> {
         val pairDigits = state.candidates[pair.first()]
         val withoutCurrentPair = unit.filter { cell -> cell !in pair }
         val removableDigitsByCell = withoutCurrentPair

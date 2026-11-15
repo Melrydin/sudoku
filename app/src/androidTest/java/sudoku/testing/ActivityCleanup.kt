@@ -8,7 +8,8 @@ fun finishTestActivities() {
     val instrumentation = InstrumentationRegistry.getInstrumentation()
     instrumentation.runOnMainSync {
         val monitor = ActivityLifecycleMonitorRegistry.getInstance()
-        Stage.values().flatMap { monitor.getActivitiesInStage(it) }.distinct().forEach { it.finish() }
+        Stage.values().flatMap { monitor.getActivitiesInStage(it) }.distinct()
+            .forEach { it.finish() }
     }
     instrumentation.waitForIdleSync()
 }

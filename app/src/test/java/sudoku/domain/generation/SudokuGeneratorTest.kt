@@ -1,9 +1,9 @@
 package sudoku.domain.generation
 
-import kotlin.random.Random
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import sudoku.domain.board.SudokuRules
+import kotlin.random.Random
 
 class SudokuGeneratorTest {
     @Test(timeout = 5000)

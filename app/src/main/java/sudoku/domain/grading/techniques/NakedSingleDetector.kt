@@ -14,13 +14,13 @@ class NakedSingleDetector : TechniqueDetector {
 
         board.forEach { cell ->
             val candidates = state.candidates[cell]
-            if (candidates.size == 1){
+            if (candidates.size == 1) {
                 val candidate = candidates.single()
                 return TechniqueSearchResult.Found(
                     LogicalStep(
-                    technique,
-                    mapOf(cell to candidate)
-                )
+                        technique,
+                        mapOf(cell to candidate)
+                    )
                 )
             }
 

@@ -4,12 +4,12 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import java.util.concurrent.CancellationException
-import java.util.concurrent.Executors
-import java.util.concurrent.Future
 import sudoku.domain.game.GameSession
 import sudoku.domain.game.NewGameFactory
 import sudoku.domain.puzzle.PuzzleId
+import java.util.concurrent.CancellationException
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
 
 class GamePreparationModel : ViewModel() {
     private val worker = Executors.newSingleThreadExecutor()
@@ -38,7 +38,14 @@ class GamePreparationModel : ViewModel() {
 
     private fun generate(puzzle: PuzzleId, prefillNotes: Boolean) {
         try {
-            mutableState.postValue(GamePreparationState.Ready(NewGameFactory.create(puzzle, prefillNotes)))
+            mutableState.postValue(
+                GamePreparationState.Ready(
+                    NewGameFactory.create(
+                        puzzle,
+                        prefillNotes
+                    )
+                )
+            )
         } catch (error: Exception) {
             if (error is CancellationException) return
             Log.e("GamePreparation", "Puzzle generation failed for ${puzzle.key}.", error)

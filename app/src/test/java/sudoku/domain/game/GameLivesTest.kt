@@ -79,8 +79,10 @@ class GameLivesTest {
     fun reconstructingASessionKeepsItsMistakesAndSolution() {
         session.select(2)
         session.enter(1)
-        val restored = GameSession(session.state, session.undoHistory,
-            initialSolution = session.solution, initialMistakes = session.mistakes)
+        val restored = GameSession(
+            session.state, session.undoHistory,
+            initialSolution = session.solution, initialMistakes = session.mistakes
+        )
         restored.undo()
         assertEquals(2, restored.remainingLives)
         assertEquals(session.solution.cells, restored.solution.cells)

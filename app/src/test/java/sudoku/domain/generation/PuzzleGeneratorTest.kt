@@ -38,9 +38,10 @@ class PuzzleGeneratorTest {
     fun retriesUnreachableTargetsAndStopsAsSoonAsTheTargetIsReached() {
         var checks = 0
         var attempts = 0
-        val generator = PuzzleGenerator({ attempts++; TestBoards.solved() }, ClueRemover(countSolutions = {
-            if (++checks <= 81) SolutionCount.MULTIPLE else SolutionCount.UNIQUE
-        }))
+        val generator =
+            PuzzleGenerator({ attempts++; TestBoards.solved() }, ClueRemover(countSolutions = {
+                if (++checks <= 81) SolutionCount.MULTIPLE else SolutionCount.UNIQUE
+            }))
         val result = generator.generate(80, 3) as ClueRemovalResult.Removed
         assertTrue(result.targetReached)
         assertEquals(2, attempts)
@@ -50,9 +51,10 @@ class PuzzleGeneratorTest {
     @Test
     fun exhaustionReportsTheUnreachedTargetAndRespectsTheAttemptLimit() {
         var attempts = 0
-        val generator = PuzzleGenerator({ attempts++; TestBoards.solved() }, ClueRemover(countSolutions = {
-            SolutionCount.MULTIPLE
-        }))
+        val generator =
+            PuzzleGenerator({ attempts++; TestBoards.solved() }, ClueRemover(countSolutions = {
+                SolutionCount.MULTIPLE
+            }))
         val result = generator.generate(80, 3) as ClueRemovalResult.Removed
         assertFalse(result.targetReached)
         assertEquals(3, attempts)
@@ -62,9 +64,10 @@ class PuzzleGeneratorTest {
     @Test
     fun missingCountersDoNotTriggerFurtherAttempts() {
         var attempts = 0
-        val generator = PuzzleGenerator({ attempts++; TestBoards.solved() }, ClueRemover(countSolutions = {
-            SolutionCount.NOT_IMPLEMENTED
-        }))
+        val generator =
+            PuzzleGenerator({ attempts++; TestBoards.solved() }, ClueRemover(countSolutions = {
+                SolutionCount.NOT_IMPLEMENTED
+            }))
         assertEquals(ClueRemovalResult.CounterRequired, generator.generate(80, 3))
         assertEquals(1, attempts)
     }

@@ -42,7 +42,8 @@ class NewGameFactoryTest {
     @Test(timeout = 5000)
     fun difficultyIsPartOfThePuzzleIdentity() {
         val first = NewGameFactory.create(puzzle, false).state.puzzle
-        val other = NewGameFactory.create(puzzle.copy(difficulty = Difficulty.MEDIUM), false).state.puzzle
+        val other =
+            NewGameFactory.create(puzzle.copy(difficulty = Difficulty.MEDIUM), false).state.puzzle
         assertNotEquals(first.cells, other.cells)
     }
 
@@ -50,7 +51,8 @@ class NewGameFactoryTest {
     fun generatedGamesRespectThePrefillOption() {
         val state = NewGameFactory.create(puzzle, true).state
         assertEquals(GameNotes.prefill(state.puzzle), state.notes)
-        assertTrue(state.puzzle.cells.indices.filter { state.puzzle[it] != 0 }.all { state.notes[it].isEmpty() })
+        assertTrue(state.puzzle.cells.indices.filter { state.puzzle[it] != 0 }
+            .all { state.notes[it].isEmpty() })
     }
 
     @Test(timeout = 30000)
@@ -74,7 +76,8 @@ class NewGameFactoryTest {
         val legacy = puzzle.copy(version = GeneratorVersion.V1)
         val random = PuzzleRandom.forPuzzle(legacy)
         val solution = SudokuGenerator(random).generate()
-        val expected = ClueRemover(random = random).removeClues(solution, 36) as ClueRemovalResult.Removed
+        val expected =
+            ClueRemover(random = random).removeClues(solution, 36) as ClueRemovalResult.Removed
         val session = NewGameFactory.create(legacy, false)
         assertEquals(expected.puzzle.cells, session.state.puzzle.cells)
         assertEquals(solution.cells, session.solution.cells)

@@ -9,9 +9,9 @@ import sudoku.data.preferences.AppPreferences
 import sudoku.domain.puzzle.PuzzleId
 import sudoku.domain.settings.ColorTheme
 import sudoku.ui.about.AboutDialog
+import sudoku.ui.common.label
 import sudoku.ui.settings.SettingsActivity
 import sudoku.ui.statistics.TimesActivity
-import sudoku.ui.common.label
 import sudoku.ui.theme.ThemePalette
 import sudoku.ui.theme.label
 
@@ -38,7 +38,13 @@ class HomeScreen(
             contentDescription = root.context.getString(
                 R.string.theme_description, root.context.getString(preferences.theme.label),
             )
-            setOnClickListener { ThemePalette(root.context, preferences.theme, onThemeSelected).show(it) }
+            setOnClickListener {
+                ThemePalette(
+                    root.context,
+                    preferences.theme,
+                    onThemeSelected
+                ).show(it)
+            }
         }
     }
 
@@ -53,8 +59,10 @@ class HomeScreen(
     }
 
     private fun bindActions() {
-        root.findViewById<View>(R.id.new_game).setOnClickListener { onNewGame(preferences.puzzleId) }
-        root.findViewById<View>(R.id.continue_game).setOnClickListener { onContinue(preferences.puzzleId) }
+        root.findViewById<View>(R.id.new_game)
+            .setOnClickListener { onNewGame(preferences.puzzleId) }
+        root.findViewById<View>(R.id.continue_game)
+            .setOnClickListener { onContinue(preferences.puzzleId) }
         root.findViewById<View>(R.id.settings).setOnClickListener {
             root.context.startActivity(Intent(root.context, SettingsActivity::class.java))
         }
@@ -79,11 +87,13 @@ class HomeScreen(
     private fun renderSelection() {
         val label = root.findViewById<TextView>(R.id.difficulty_name)
         label.setText(preferences.difficulty.label)
-        label.contentDescription = root.context.getString(R.string.difficulty_description, label.text)
+        label.contentDescription =
+            root.context.getString(R.string.difficulty_description, label.text)
         root.findViewById<TextView>(R.id.level_name).text =
             root.context.getString(R.string.level_number, preferences.level)
         root.findViewById<View>(R.id.previous_level).isEnabled = preferences.level > 1
         root.findViewById<View>(R.id.next_level).isEnabled = preferences.level < Int.MAX_VALUE
-        root.findViewById<View>(R.id.continue_game).isInvisible = !hasSavedGame(preferences.puzzleId)
+        root.findViewById<View>(R.id.continue_game).isInvisible =
+            !hasSavedGame(preferences.puzzleId)
     }
 }

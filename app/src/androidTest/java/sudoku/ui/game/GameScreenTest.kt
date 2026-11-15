@@ -45,11 +45,12 @@ import sudoku.data.game.SharedPreferencesGameRepository
 import sudoku.data.preferences.AppPreferences
 import sudoku.data.preferences.GamePreferences
 import sudoku.data.puzzle.SamplePuzzle
+import sudoku.data.statistics.SharedPreferencesBestTimeRepository
 import sudoku.domain.game.GameNotes
 import sudoku.domain.game.GameSession
 import sudoku.domain.game.GameState
-import sudoku.domain.generation.PuzzleRandom
 import sudoku.domain.generation.GeneratorConfig
+import sudoku.domain.generation.PuzzleRandom
 import sudoku.domain.generation.SudokuGenerator
 import sudoku.domain.puzzle.Difficulty
 import sudoku.domain.puzzle.GeneratorVersion
@@ -58,10 +59,9 @@ import sudoku.domain.settings.ColorTheme
 import sudoku.domain.settings.GameOptions
 import sudoku.domain.solver.SolutionCount
 import sudoku.domain.solver.SolutionCounter
-import sudoku.testing.ScreenCapture
 import sudoku.testing.PreferenceSnapshot
+import sudoku.testing.ScreenCapture
 import sudoku.testing.finishTestActivities
-import sudoku.data.statistics.SharedPreferencesBestTimeRepository
 import sudoku.ui.home.MainActivity
 
 @RunWith(AndroidJUnit4::class)
@@ -287,7 +287,18 @@ class GameScreenTest {
         val before = games.load(easyPuzzle)!!.state
         togglePrefillInSettings()
         cell(2).check(matches(withText("4")))
-        cell(3).check(matches(withContentDescription(containsString(context.getString(R.string.cell_notes, "2, 6")))))
+        cell(3).check(
+            matches(
+                withContentDescription(
+                    containsString(
+                        context.getString(
+                            R.string.cell_notes,
+                            "2, 6"
+                        )
+                    )
+                )
+            )
+        )
         checkSavedState(before.copy(notes = GameNotes.prefill(before.board)))
         onView(withId(R.id.undo)).perform(scrollTo(), click())
         checkSavedState(before)
@@ -305,7 +316,18 @@ class GameScreenTest {
         val state = games.load(easyPuzzle)!!.state
         assertEquals(4, state.board[2])
         assertEquals(GameNotes.prefill(state.board), state.notes)
-        cell(3).check(matches(withContentDescription(containsString(context.getString(R.string.cell_notes, "2, 6")))))
+        cell(3).check(
+            matches(
+                withContentDescription(
+                    containsString(
+                        context.getString(
+                            R.string.cell_notes,
+                            "2, 6"
+                        )
+                    )
+                )
+            )
+        )
     }
 
     @Test
@@ -401,7 +423,10 @@ class GameScreenTest {
         cell(editable).perform(click())
         number(solution[editable]).perform(scrollTo(), click())
         onView(withId(R.id.victory_title)).check(matches(isDisplayed()))
-        assertEquals(1, SharedPreferencesBestTimeRepository(context).forDifficulty(Difficulty.EASY).size)
+        assertEquals(
+            1,
+            SharedPreferencesBestTimeRepository(context).forDifficulty(Difficulty.EASY).size
+        )
         assertTrue(games.load(easyPuzzle)!!.state.isComplete)
     }
 

@@ -35,7 +35,8 @@ class GameTimerDisplay(
 
     fun refresh() {
         if (active && !hasEnded()) timer.resume() else timer.pause()
-        val time = PlayTimeFormatter.format(timer.elapsedMillis, view.resources.configuration.locales[0])
+        val time =
+            PlayTimeFormatter.format(timer.elapsedMillis, view.resources.configuration.locales[0])
         view.text = time
         view.contentDescription = view.context.getString(R.string.play_time_description, time)
     }

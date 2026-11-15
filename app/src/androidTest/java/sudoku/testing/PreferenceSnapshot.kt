@@ -22,7 +22,8 @@ class PreferenceSnapshot(private val context: Context, private vararg val names:
         saved = emptyMap()
     }
 
-    private fun preferences(name: String): SharedPreferences = context.getSharedPreferences(name, Context.MODE_PRIVATE)
+    private fun preferences(name: String): SharedPreferences =
+        context.getSharedPreferences(name, Context.MODE_PRIVATE)
 
     private fun restoreValue(editor: SharedPreferences.Editor, key: String, value: Any?) {
         when (value) {

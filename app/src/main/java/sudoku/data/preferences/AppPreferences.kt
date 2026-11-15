@@ -11,11 +11,13 @@ class AppPreferences(context: Context) {
     private val preferences = context.getSharedPreferences("home", Context.MODE_PRIVATE)
 
     var theme: ColorTheme
-        get() = ColorTheme.entries.find { it.name == preferences.getString("theme", null) } ?: ColorTheme.AURUM
+        get() = ColorTheme.entries.find { it.name == preferences.getString("theme", null) }
+            ?: ColorTheme.AURUM
         set(value) = preferences.edit { putString("theme", value.name) }
 
     var difficulty: Difficulty
-        get() = Difficulty.entries.find { it.name == preferences.getString("difficulty", null) } ?: Difficulty.EASY
+        get() = Difficulty.entries.find { it.name == preferences.getString("difficulty", null) }
+            ?: Difficulty.EASY
         set(value) = preferences.edit { putString("difficulty", value.name) }
 
     var level: Int

@@ -1,11 +1,11 @@
 package sudoku.domain.generation
 
-import kotlin.random.Random
 import sudoku.domain.board.SudokuBoard
 import sudoku.domain.board.SudokuRules
 import sudoku.domain.common.checkCancellation
 import sudoku.domain.solver.SolutionCount
 import sudoku.domain.solver.SolutionCounter
+import kotlin.random.Random
 
 class ClueRemover(
     private val countSolutions: (SudokuBoard) -> SolutionCount = SolutionCounter()::count,

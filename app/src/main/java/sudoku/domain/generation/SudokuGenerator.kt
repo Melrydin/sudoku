@@ -1,9 +1,9 @@
 package sudoku.domain.generation
 
-import kotlin.random.Random
 import sudoku.domain.board.SudokuBoard
 import sudoku.domain.board.SudokuRules
 import sudoku.domain.common.checkCancellation
+import kotlin.random.Random
 
 const val seed: Int = GeneratorConfig.APP_SEED
 

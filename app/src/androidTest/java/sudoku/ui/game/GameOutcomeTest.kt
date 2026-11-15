@@ -108,7 +108,16 @@ class GameOutcomeTest {
         ScreenCapture.capture("victory.png")
         onView(withId(R.id.victory_best_times)).perform(scrollTo(), click())
         onView(withId(R.id.result_time)).check(matches(withText(time)))
-        onView(withId(R.id.result_level)).check(matches(withText(context.getString(R.string.level_number, 1))))
+        onView(withId(R.id.result_level)).check(
+            matches(
+                withText(
+                    context.getString(
+                        R.string.level_number,
+                        1
+                    )
+                )
+            )
+        )
         ScreenCapture.capture("best-times.png")
     }
 
@@ -126,8 +135,10 @@ class GameOutcomeTest {
     private fun prepareWinningGame(): GameSession {
         scenario.close()
         val original = GameSession(SamplePuzzle.create())
-        val state = GameState(original.state.puzzle, original.solution.withValue(2, 0), selectedCell = 2)
-        val game = GameSession(state, initialElapsedMillis = 125_000, initialSolution = original.solution)
+        val state =
+            GameState(original.state.puzzle, original.solution.withValue(2, 0), selectedCell = 2)
+        val game =
+            GameSession(state, initialElapsedMillis = 125_000, initialSolution = original.solution)
         games.save(puzzle, game)
         scenario = ActivityScenario.launch(GameActivity.intent(context, puzzle, false))
         return game
@@ -139,7 +150,17 @@ class GameOutcomeTest {
     }
 
     private fun checkLives(lives: Int) {
-        onView(withId(R.id.game_lives)).check(matches(withText(context.getString(R.string.game_lives, lives, 3))))
+        onView(withId(R.id.game_lives)).check(
+            matches(
+                withText(
+                    context.getString(
+                        R.string.game_lives,
+                        lives,
+                        3
+                    )
+                )
+            )
+        )
     }
 
     private fun cell(index: Int) = onView(withTagValue(equalTo("cell_$index")))

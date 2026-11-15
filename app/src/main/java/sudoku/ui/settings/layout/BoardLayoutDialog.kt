@@ -16,7 +16,8 @@ class BoardLayoutDialog(
     private val onPreview: (BoardLayoutOptions) -> Unit,
     private val onClosed: () -> Unit,
 ) {
-    private val root = LayoutInflater.from(context).inflate(R.layout.dialog_board_layout, FrameLayout(context), false)
+    private val root = LayoutInflater.from(context)
+        .inflate(R.layout.dialog_board_layout, FrameLayout(context), false)
     private val dialog = MaterialAlertDialogBuilder(context).setView(root).create()
     private var draft = preferences.boardLayout
 
@@ -43,7 +44,11 @@ class BoardLayoutDialog(
         dialog.dismiss()
     }
 
-    private fun bindSlider(id: Int, value: Float, update: BoardLayoutOptions.(Float) -> BoardLayoutOptions) {
+    private fun bindSlider(
+        id: Int,
+        value: Float,
+        update: BoardLayoutOptions.(Float) -> BoardLayoutOptions
+    ) {
         root.findViewById<Slider>(id).apply {
             this.value = value
             addOnChangeListener { _, next, _ ->

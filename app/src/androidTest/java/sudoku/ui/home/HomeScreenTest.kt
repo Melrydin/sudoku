@@ -21,13 +21,14 @@ import sudoku.R
 import sudoku.data.preferences.AppPreferences
 import sudoku.domain.puzzle.Difficulty
 import sudoku.domain.settings.ColorTheme
-import sudoku.testing.ScreenCapture
 import sudoku.testing.PreferenceSnapshot
+import sudoku.testing.ScreenCapture
 
 @RunWith(AndroidJUnit4::class)
 class HomeScreenTest {
     private val preferences = AppPreferences(ApplicationProvider.getApplicationContext())
-    private val bestTimesSnapshot = PreferenceSnapshot(ApplicationProvider.getApplicationContext(), "best_times")
+    private val bestTimesSnapshot =
+        PreferenceSnapshot(ApplicationProvider.getApplicationContext(), "best_times")
     private lateinit var scenario: ActivityScenario<MainActivity>
     private lateinit var previousTheme: ColorTheme
     private lateinit var previousDifficulty: Difficulty
@@ -126,7 +127,16 @@ class HomeScreenTest {
 
     private fun checkLevel(level: Int) {
         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
-        onView(withId(R.id.level_name)).check(matches(withText(context.getString(R.string.level_number, level))))
+        onView(withId(R.id.level_name)).check(
+            matches(
+                withText(
+                    context.getString(
+                        R.string.level_number,
+                        level
+                    )
+                )
+            )
+        )
     }
 
     private fun resetLevels(): Map<Difficulty, Int> = Difficulty.entries.associateWith {

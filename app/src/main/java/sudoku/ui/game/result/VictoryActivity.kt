@@ -21,7 +21,9 @@ class VictoryActivity : ThemedActivity() {
         super.onCreate(savedInstanceState)
         val id = intent.getStringExtra(EXTRA_GAME_ID).orEmpty()
         val result = appContainer.bestTimes.find(id)
-        if (result == null) { finish(); return }
+        if (result == null) {
+            finish(); return
+        }
         setContentView(R.layout.activity_victory)
         applySystemInsets(findViewById(R.id.victory_root))
         render(result)
@@ -37,20 +39,27 @@ class VictoryActivity : ThemedActivity() {
         findViewById<TextView>(R.id.victory_puzzle).text = getString(
             R.string.game_identity, getString(result.puzzle.difficulty.label), result.puzzle.level,
         )
-        findViewById<TextView>(R.id.victory_time).text = PlayTimeFormatter.format(result.elapsedMillis)
+        findViewById<TextView>(R.id.victory_time).text =
+            PlayTimeFormatter.format(result.elapsedMillis)
         findViewById<TextView>(R.id.victory_assistance).text = getString(
             R.string.assistance_points, result.assistancePoints, GameAssist.entries.size,
         )
     }
 
     private fun bindNavigation(result: GameResult) {
-        findViewById<View>(R.id.victory_home).setOnClickListener { HomeNavigation.open(this, result.puzzle) }
+        findViewById<View>(R.id.victory_home).setOnClickListener {
+            HomeNavigation.open(
+                this,
+                result.puzzle
+            )
+        }
         findViewById<View>(R.id.victory_best_times).setOnClickListener {
             preferences.difficulty = result.puzzle.difficulty
             startActivity(Intent(this, TimesActivity::class.java))
         }
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() = HomeNavigation.open(this@VictoryActivity, result.puzzle)
+            override fun handleOnBackPressed() =
+                HomeNavigation.open(this@VictoryActivity, result.puzzle)
         })
     }
 

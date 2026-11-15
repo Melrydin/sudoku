@@ -23,12 +23,20 @@ class LayoutPreviewActivity : ThemedActivity() {
         setContentView(R.layout.activity_game)
         val root = findViewById<View>(R.id.game_root)
         applySystemInsets(root)
-        val session = appContainer.games.load(preferences.puzzleId) ?: GameSession(SamplePuzzle.create())
-        GameScreen(root, session, {}, { gamePreferences.options }).bind(preferences.puzzleId, {}, {}, {}, {})
-        findViewById<TextView>(R.id.game_timer).text = PlayTimeFormatter.format(session.elapsedMillis)
+        val session =
+            appContainer.games.load(preferences.puzzleId) ?: GameSession(SamplePuzzle.create())
+        GameScreen(root, session, {}, { gamePreferences.options }).bind(
+            preferences.puzzleId,
+            {},
+            {},
+            {},
+            {})
+        findViewById<TextView>(R.id.game_timer).text =
+            PlayTimeFormatter.format(session.elapsedMillis)
         val layout = BoardLayoutController(root)
         draft = savedInstanceState?.let(::restoreDraft) ?: gamePreferences.boardLayout
-        dialog = BoardLayoutDialog(this, gamePreferences, { draft = it; layout.apply(it) }, ::finish)
+        dialog =
+            BoardLayoutDialog(this, gamePreferences, { draft = it; layout.apply(it) }, ::finish)
         dialog.show(draft)
     }
 
@@ -45,6 +53,8 @@ class LayoutPreviewActivity : ThemedActivity() {
     }
 
     private fun restoreDraft(state: Bundle): BoardLayoutOptions = BoardLayoutOptions(
-        state.getFloat("width", 1f), state.getFloat("vertical", 0.5f), state.getFloat("horizontal", 0.5f),
+        state.getFloat("width", 1f),
+        state.getFloat("vertical", 0.5f),
+        state.getFloat("horizontal", 0.5f),
     )
 }

@@ -16,7 +16,11 @@ class NakedSingleDetectorTest {
     fun findsEveryDigitInEveryCellWithoutRecomputingCandidates() {
         for (cell in 0 until SudokuBoard.CELL_COUNT) {
             for (digit in 1..SudokuBoard.SIZE) {
-                checks.assertPlacement(LogicalStates.withCandidates(empty, cell to setOf(digit)), cell, digit)
+                checks.assertPlacement(
+                    LogicalStates.withCandidates(empty, cell to setOf(digit)),
+                    cell,
+                    digit
+                )
             }
         }
     }
@@ -29,7 +33,13 @@ class NakedSingleDetectorTest {
 
     @Test
     fun doesNotPlaceADigitWithoutCandidatesOrWithMultipleCandidates() {
-        checks.assertNotFound(LogicalStates.withCandidates(empty, 0 to emptySet(), 1 to setOf(2, 3)))
+        checks.assertNotFound(
+            LogicalStates.withCandidates(
+                empty,
+                0 to emptySet(),
+                1 to setOf(2, 3)
+            )
+        )
         checks.assertNotFound(empty.copy(candidates = List(SudokuBoard.CELL_COUNT) { emptySet() }))
     }
 
@@ -41,7 +51,8 @@ class NakedSingleDetectorTest {
 
     @Test
     fun continuesPastCellsWithoutCandidatesAndWithMultipleCandidates() {
-        val state = LogicalStates.withCandidates(empty, 0 to emptySet(), 1 to setOf(2, 3), 2 to setOf(4))
+        val state =
+            LogicalStates.withCandidates(empty, 0 to emptySet(), 1 to setOf(2, 3), 2 to setOf(4))
         checks.assertPlacement(state, 2, 4)
     }
 

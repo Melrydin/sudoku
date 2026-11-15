@@ -18,7 +18,10 @@ class CellDecoration(private val colors: ThemeColors, private val invalidate: ()
     val foreground: Int
         get() {
             val background = color ?: return colors.foreground
-            return listOf(colors.foreground, colors.background).maxBy { ColorUtils.calculateContrast(it, background) }
+            return listOf(
+                colors.foreground,
+                colors.background
+            ).maxBy { ColorUtils.calculateContrast(it, background) }
         }
 
     fun update(state: GameState, index: Int, options: GameOptions) {
@@ -47,6 +50,7 @@ class CellDecoration(private val colors: ThemeColors, private val invalidate: ()
             options.highlightSameDigits && digit != 0 && state.board[index] == digit -> colors.accent
             options.circleGivens && state.puzzle[index] != 0 ->
                 ColorUtils.blendARGB(colors.background, colors.foreground, 0.35f)
+
             else -> null
         }
     }

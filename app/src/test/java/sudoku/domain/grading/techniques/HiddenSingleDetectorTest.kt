@@ -49,7 +49,8 @@ class HiddenSingleDetectorTest {
 
     @Test
     fun continuesPastAUnitWithNoPositionsForADigit() {
-        val restricted = LogicalStates.restrictDigit(empty, SudokuUnits.rows.first(), emptyList(), 1)
+        val restricted =
+            LogicalStates.restrictDigit(empty, SudokuUnits.rows.first(), emptyList(), 1)
         val state = LogicalStates.restrictDigit(restricted, SudokuUnits.rows[1], listOf(9), 5)
         checks.assertPlacement(state, 9, 5)
     }

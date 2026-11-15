@@ -1,9 +1,9 @@
 package sudoku.domain.generation
 
+import sudoku.domain.puzzle.PuzzleId
 import java.nio.ByteBuffer
 import java.security.MessageDigest
 import kotlin.random.Random
-import sudoku.domain.puzzle.PuzzleId
 
 object PuzzleRandom {
     fun forPuzzle(puzzle: PuzzleId): Random {

@@ -20,7 +20,9 @@ class NakedPairDetectorTest {
                     val digits = setOf(first, second)
                     val pair = listOf(unit.first(), unit.last())
                     val state = stateWithCandidates(*pair.map { it to digits }.toTypedArray())
-                    assertions.assertEliminations(state, (unit - pair.toSet()).associateWith { digits })
+                    assertions.assertEliminations(
+                        state,
+                        (unit - pair.toSet()).associateWith { digits })
                 }
             }
         }

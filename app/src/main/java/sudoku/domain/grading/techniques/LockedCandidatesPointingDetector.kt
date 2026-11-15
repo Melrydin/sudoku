@@ -18,12 +18,16 @@ class LockedCandidatesPointingDetector : TechniqueDetector {
                 val matchingCells = box.filter { cell ->
                     digit in state.candidates[cell]
                 }
-                val row = matchingCells.map { cell -> cell / SudokuBoard.SIZE }.distinct().singleOrNull()
-                val column = matchingCells.map { cell -> cell % SudokuBoard.SIZE }.distinct().singleOrNull()
+                val row =
+                    matchingCells.map { cell -> cell / SudokuBoard.SIZE }.distinct().singleOrNull()
+                val column =
+                    matchingCells.map { cell -> cell % SudokuBoard.SIZE }.distinct().singleOrNull()
                 val eliminationCells = findEliminationCells(state, box, row, column, digit)
                 if (eliminationCells.isNotEmpty()) {
                     return TechniqueSearchResult.Found(
-                        LogicalStep(technique, eliminations = eliminationCells.associateWith { setOf(digit) })
+                        LogicalStep(
+                            technique,
+                            eliminations = eliminationCells.associateWith { setOf(digit) })
                     )
                 }
             }

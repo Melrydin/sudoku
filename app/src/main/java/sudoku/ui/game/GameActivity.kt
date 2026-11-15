@@ -19,14 +19,14 @@ import sudoku.domain.generation.GeneratorConfig
 import sudoku.domain.puzzle.Difficulty
 import sudoku.domain.puzzle.GeneratorVersion
 import sudoku.domain.puzzle.PuzzleId
-import sudoku.ui.theme.ThemePalette
+import sudoku.domain.statistics.GameResult
 import sudoku.ui.common.ThemedActivity
 import sudoku.ui.game.board.BoardLayoutController
 import sudoku.ui.game.result.GameOverDialog
 import sudoku.ui.game.result.VictoryActivity
 import sudoku.ui.navigation.HomeNavigation
-import sudoku.domain.statistics.GameResult
 import sudoku.ui.settings.SettingsActivity
+import sudoku.ui.theme.ThemePalette
 
 class GameActivity : ThemedActivity() {
     private val store by lazy { appContainer.games }
@@ -68,7 +68,9 @@ class GameActivity : ThemedActivity() {
         session.applyOptions(gamePreferences.options)
         saveSession()
         screen.render()
-        if (session.state.isComplete) { showVictory(); return }
+        if (session.state.isComplete) {
+            showVictory(); return
+        }
         boardLayout.apply(gamePreferences.boardLayout)
         timerDisplay.start()
     }
@@ -165,7 +167,8 @@ class GameActivity : ThemedActivity() {
         if (::timerDisplay.isInitialized) timerDisplay.stop()
         store.delete(puzzle)
         if (!gameReady) showGameOverBackground()
-        val dialog = gameOverDialog ?: GameOverDialog(this, ::returnHome).also { gameOverDialog = it }
+        val dialog =
+            gameOverDialog ?: GameOverDialog(this, ::returnHome).also { gameOverDialog = it }
         dialog.show()
     }
 
@@ -186,8 +189,10 @@ class GameActivity : ThemedActivity() {
         victoryOpened = true
         timerDisplay.stop()
         saveSession()
-        val result = GameResult(session.id, puzzle, session.elapsedMillis,
-            session.assistancePoints, System.currentTimeMillis())
+        val result = GameResult(
+            session.id, puzzle, session.elapsedMillis,
+            session.assistancePoints, System.currentTimeMillis()
+        )
         appContainer.bestTimes.record(result)
         startActivity(VictoryActivity.intent(this, session.id))
         finish()
@@ -202,7 +207,9 @@ class GameActivity : ThemedActivity() {
     }
 
     private fun confirmRestart() {
-        if (!session.state.hasEntries || session.state.isComplete) restart() else MaterialAlertDialogBuilder(this)
+        if (!session.state.hasEntries || session.state.isComplete) restart() else MaterialAlertDialogBuilder(
+            this
+        )
             .setTitle(R.string.restart_title)
             .setMessage(R.string.restart_message)
             .setNegativeButton(R.string.cancel, null)
@@ -219,8 +226,9 @@ class GameActivity : ThemedActivity() {
     }
 
     private fun puzzleFromIntent(): PuzzleId {
-        val difficulty = Difficulty.entries.find { it.name == intent.getStringExtra(EXTRA_DIFFICULTY) }
-            ?: Difficulty.EASY
+        val difficulty =
+            Difficulty.entries.find { it.name == intent.getStringExtra(EXTRA_DIFFICULTY) }
+                ?: Difficulty.EASY
         val versionNumber = intent.getIntExtra(EXTRA_VERSION, GeneratorConfig.VERSION.number)
         val version = GeneratorVersion.entries.find { it.number == versionNumber }
             ?: GeneratorConfig.VERSION

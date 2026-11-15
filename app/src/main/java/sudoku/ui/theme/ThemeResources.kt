@@ -17,7 +17,10 @@ private val ColorTheme.resources: ThemeResources
         ColorTheme.PAPER -> ThemeResources(R.string.theme_paper, R.style.Theme_Sudoku_Paper, true)
         ColorTheme.OCEAN -> ThemeResources(R.string.theme_ocean, R.style.Theme_Sudoku_Ocean, true)
         ColorTheme.ROSE -> ThemeResources(R.string.theme_rose, R.style.Theme_Sudoku_Rose, true)
-        ColorTheme.MIDNIGHT -> ThemeResources(R.string.theme_midnight, R.style.Theme_Sudoku_Midnight)
+        ColorTheme.MIDNIGHT -> ThemeResources(
+            R.string.theme_midnight,
+            R.style.Theme_Sudoku_Midnight
+        )
     }
 
 val ColorTheme.label: Int

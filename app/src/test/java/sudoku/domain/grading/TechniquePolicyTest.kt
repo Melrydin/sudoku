@@ -7,11 +7,11 @@ import sudoku.domain.puzzle.Difficulty
 import sudoku.domain.puzzle.GeneratorVersion
 
 class TechniquePolicyTest {
-    private val version = GeneratorVersion.V1
+    private val version: GeneratorVersion = GeneratorVersion.V1
 
     @Test
     fun versionOneContainsAllFourteenTechniquesInTheAgreedOrder() {
-        val techniques = TechniquePolicy.rules(version).map { it.technique }
+        val techniques: List<SolvingTechnique> = TechniquePolicy.rules(version).map { it.technique }
         assertEquals(14, techniques.size)
         assertEquals(SolvingTechnique.entries.toList(), techniques)
         assertEquals(techniques.size, techniques.distinct().size)
@@ -19,9 +19,9 @@ class TechniquePolicyTest {
 
     @Test
     fun eachDifficultyIncludesAllLowerTiers() {
-        val expectedSizes = listOf(2, 3, 7, 10, 14)
-        Difficulty.entries.forEachIndexed { index, difficulty ->
-            val allowed = TechniquePolicy.allowed(version, difficulty)
+        val expectedSizes: List<Int> = listOf(2, 3, 7, 10, 14)
+        Difficulty.entries.forEachIndexed { index: Int, difficulty: Difficulty ->
+            val allowed: List<TechniqueRule> = TechniquePolicy.allowed(version, difficulty)
             assertEquals(expectedSizes[index], allowed.size)
             assertEquals(TechniquePolicy.rules(version).take(allowed.size), allowed)
         }
@@ -29,8 +29,8 @@ class TechniquePolicyTest {
 
     @Test
     fun hardAndHighestTierRemainDistinct() {
-        val hard = TechniquePolicy.allowed(version, Difficulty.HARD).map { it.technique }
-        val highest = TechniquePolicy.allowed(version, Difficulty.EXTREME).map { it.technique }
+        val hard: List<SolvingTechnique> = TechniquePolicy.allowed(version, Difficulty.HARD).map { it.technique }
+        val highest: List<SolvingTechnique> = TechniquePolicy.allowed(version, Difficulty.EXTREME).map { it.technique }
         assertTrue(SolvingTechnique.X_WING in hard)
         assertTrue(SolvingTechnique.XY_WING !in hard)
         assertTrue(SolvingTechnique.XY_WING in highest)

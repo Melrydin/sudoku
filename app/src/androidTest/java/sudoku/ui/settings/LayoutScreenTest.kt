@@ -12,6 +12,7 @@ import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.material.slider.Slider
+import org.hamcrest.Matcher
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -25,7 +26,7 @@ import sudoku.ui.settings.layout.LayoutPreviewActivity
 
 @RunWith(AndroidJUnit4::class)
 class LayoutScreenTest {
-    private val preferences = GamePreferences(ApplicationProvider.getApplicationContext())
+    private val preferences: GamePreferences = GamePreferences(ApplicationProvider.getApplicationContext())
     private lateinit var previousLayout: BoardLayoutOptions
     private lateinit var scenario: ActivityScenario<LayoutPreviewActivity>
 
@@ -75,7 +76,7 @@ class LayoutScreenTest {
 
     private fun sliderValue(value: Float): ViewAction = object : ViewAction {
         override fun getDescription(): String = "Set slider value to $value"
-        override fun getConstraints() = isAssignableFrom(Slider::class.java)
+        override fun getConstraints(): Matcher<View> = isAssignableFrom(Slider::class.java)
         override fun perform(uiController: UiController, view: View) {
             (view as Slider).value = value
             uiController.loopMainThreadUntilIdle()

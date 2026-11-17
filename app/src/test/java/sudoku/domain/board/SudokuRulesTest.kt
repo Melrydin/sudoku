@@ -10,15 +10,15 @@ import sudoku.fixtures.TestBoards
 class SudokuRulesTest {
     @Test
     fun identifiesRowColumnAndBoxConflicts() {
-        for (peer in listOf(8, 72, 10)) {
-            val board = TestBoards.empty().withValue(0, 7).withValue(peer, 7)
+        for (peer: Int in listOf(8, 72, 10)) {
+            val board: SudokuBoard = TestBoards.empty().withValue(0, 7).withValue(peer, 7)
             assertEquals(setOf(0, peer), SudokuRules.conflicts(board))
         }
     }
 
     @Test
     fun allowsEqualNumbersOutsidePeerGroups() {
-        val board = TestBoards.empty().withValue(0, 7).withValue(40, 7)
+        val board: SudokuBoard = TestBoards.empty().withValue(0, 7).withValue(40, 7)
         assertTrue(SudokuRules.conflicts(board).isEmpty())
     }
 
@@ -36,8 +36,8 @@ class SudokuRulesTest {
 
     @Test
     fun boardsCopyTheSourceCells() {
-        val source = MutableList(SudokuBoard.CELL_COUNT) { 0 }
-        val board = SudokuBoard.from(source)
+        val source: MutableList<Int> = MutableList(SudokuBoard.CELL_COUNT) { 0 }
+        val board: SudokuBoard = SudokuBoard.from(source)
         source[0] = 9
         assertEquals(0, board[0])
     }

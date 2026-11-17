@@ -11,13 +11,13 @@ import sudoku.domain.statistics.GameResult
 import sudoku.ui.common.PlayTimeFormatter
 
 class BestTimesScreen(private val root: View) {
-    private val entries = root.findViewById<LinearLayout>(R.id.times_entries)
+    private val entries: LinearLayout = root.findViewById<LinearLayout>(R.id.times_entries)
 
     fun render(results: List<GameResult>) {
         root.findViewById<View>(R.id.times_empty).isVisible = results.isEmpty()
         entries.removeAllViews()
-        results.forEachIndexed { index, result ->
-            val row =
+        results.forEachIndexed { index: Int, result: GameResult ->
+            val row: View =
                 LayoutInflater.from(root.context).inflate(R.layout.item_best_time, entries, false)
             bindRow(row, index + 1, result)
             entries.addView(row)

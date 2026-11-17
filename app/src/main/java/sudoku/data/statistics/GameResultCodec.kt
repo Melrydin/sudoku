@@ -1,6 +1,7 @@
 package sudoku.data.statistics
 
 import org.json.JSONObject
+import sudoku.domain.common.OptionalValue
 import sudoku.domain.puzzle.Difficulty
 import sudoku.domain.puzzle.GeneratorVersion
 import sudoku.domain.puzzle.PuzzleId
@@ -18,11 +19,11 @@ internal object GameResultCodec {
         .put("finishedAt", result.finishedAt)
         .toString()
 
-    fun decode(encoded: String): GameResult? = runCatching {
-        val json = JSONObject(encoded)
+    fun decode(encoded: String): OptionalValue<GameResult> = runCatching {
+        val json: JSONObject = JSONObject(encoded)
         require(json.getInt("version") == 1)
-        val difficulty = Difficulty.entries.first { it.id == json.getString("difficulty") }
-        val version =
+        val difficulty: Difficulty = Difficulty.entries.first { it.id == json.getString("difficulty") }
+        val version: GeneratorVersion =
             GeneratorVersion.entries.first { it.number == json.getInt("generatorVersion") }
         GameResult(
             json.getString("gameId"),
@@ -31,5 +32,5 @@ internal object GameResultCodec {
             json.getInt("assistancePoints"),
             json.getLong("finishedAt")
         )
-    }.getOrNull()
+    }.fold({ result: GameResult -> OptionalValue.Present(result) }, { OptionalValue.Absent })
 }

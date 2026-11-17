@@ -7,7 +7,7 @@ data class TechniqueRule(val technique: SolvingTechnique, val difficulty: Diffic
 
 object TechniquePolicy {
     // This list defines V1's search order and app-specific difficulty scale.
-    private val versionOne = listOf(
+    private val versionOne: List<TechniqueRule> = listOf(
         TechniqueRule(SolvingTechnique.FULL_HOUSE, Difficulty.BEGINNER),
         TechniqueRule(SolvingTechnique.NAKED_SINGLE, Difficulty.BEGINNER),
         TechniqueRule(SolvingTechnique.HIDDEN_SINGLE, Difficulty.EASY),

@@ -13,25 +13,18 @@ import sudoku.ui.theme.ThemePalette
 
 class SettingsActivity : ThemedActivity() {
     private lateinit var screen: SettingsScreen
-    private var section = SettingsSection.MENU
+    private var section: SettingsSection = SettingsSection.MENU
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
-        val root = findViewById<View>(R.id.settings_root)
+        val root: View = findViewById<View>(R.id.settings_root)
         applySystemInsets(root)
         section =
             SettingsSection.entries.find { it.name == savedInstanceState?.getString("section") }
                 ?: section
         screen = SettingsScreen(root, appContainer.gamePreferences)
-        screen.bind(::showSection) {
-            startActivity(
-                Intent(
-                    this,
-                    LayoutPreviewActivity::class.java
-                )
-            )
-        }
+        screen.bind(::showSection) { startActivity(Intent(this, LayoutPreviewActivity::class.java)) }
         screen.render(section)
         findViewById<View>(R.id.settings_back).setOnClickListener { goBack() }
         findViewById<View>(R.id.settings_theme).setOnClickListener {
@@ -47,7 +40,7 @@ class SettingsActivity : ThemedActivity() {
 
     private fun bindBackNavigation() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() = goBack()
+            override fun handleOnBackPressed(): Unit = goBack()
         })
     }
 

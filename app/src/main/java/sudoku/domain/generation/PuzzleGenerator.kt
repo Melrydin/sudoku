@@ -13,7 +13,7 @@ class PuzzleGenerator(
         var result: ClueRemovalResult = ClueRemovalResult.CounterRequired
         repeat(maxAttempts) {
             checkCancellation()
-            val attempt = remover.removeClues(generateSolution(), targetClues)
+            val attempt: ClueRemovalResult = remover.removeClues(generateSolution(), targetClues)
             if (attempt !is ClueRemovalResult.Removed || attempt.targetReached) return attempt
             result = attempt
         }

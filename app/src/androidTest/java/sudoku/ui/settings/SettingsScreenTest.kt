@@ -25,7 +25,7 @@ import sudoku.testing.ScreenCapture
 
 @RunWith(AndroidJUnit4::class)
 class SettingsScreenTest {
-    private val preferences = GamePreferences(ApplicationProvider.getApplicationContext())
+    private val preferences: GamePreferences = GamePreferences(ApplicationProvider.getApplicationContext())
     private lateinit var previousOptions: GameOptions
     private lateinit var scenario: ActivityScenario<SettingsActivity>
 
@@ -45,19 +45,15 @@ class SettingsScreenTest {
 
     @Test
     fun individualSettingsSurviveRecreationWithoutChangingOtherSwitches() {
-        listOf(
-            R.id.setting_highlight,
-            R.id.setting_prefill,
-            R.id.setting_hide_digits
-        ).forEach(::toggle)
+        listOf(R.id.setting_highlight, R.id.setting_prefill, R.id.setting_hide_digits).forEach(::toggle)
         scenario.recreate()
         checkToggle(R.id.setting_highlight, false)
         checkToggle(R.id.setting_remaining, true)
         checkToggle(R.id.setting_prefill, true)
         checkToggle(R.id.setting_remove_notes, true)
         checkToggle(R.id.setting_hide_digits, false)
-        val restored = GamePreferences(ApplicationProvider.getApplicationContext()).options
-        val expected = GameOptions(
+        val restored: GameOptions = GamePreferences(ApplicationProvider.getApplicationContext()).options
+        val expected: GameOptions = GameOptions(
             highlightSameDigits = false,
             prefillNotes = true,
             hideCompletedDigits = false
@@ -69,7 +65,7 @@ class SettingsScreenTest {
 
     @Test
     fun everyOptionCanBeDisabledAndEnabledIndependently() {
-        val rows = listOf(
+        val rows: List<Int> = listOf(
             R.id.setting_highlight, R.id.setting_remaining, R.id.setting_prefill,
             R.id.setting_remove_notes, R.id.setting_hide_digits
         )
@@ -89,7 +85,7 @@ class SettingsScreenTest {
             R.id.setting_double_tap, R.id.setting_hold
         ).forEach(::toggle)
         scenario.recreate()
-        val expected = GameOptions(
+        val expected: GameOptions = GameOptions(
             boardAnimations = false, showTimer = false, circleGivens = true,
             doubleTapErase = true, holdToErase = true
         )

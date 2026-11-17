@@ -1,5 +1,6 @@
 package sudoku.ui.home
 
+import android.content.Context
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
@@ -26,8 +27,8 @@ import sudoku.testing.ScreenCapture
 
 @RunWith(AndroidJUnit4::class)
 class HomeScreenTest {
-    private val preferences = AppPreferences(ApplicationProvider.getApplicationContext())
-    private val bestTimesSnapshot =
+    private val preferences: AppPreferences = AppPreferences(ApplicationProvider.getApplicationContext())
+    private val bestTimesSnapshot: PreferenceSnapshot =
         PreferenceSnapshot(ApplicationProvider.getApplicationContext(), "best_times")
     private lateinit var scenario: ActivityScenario<MainActivity>
     private lateinit var previousTheme: ColorTheme
@@ -49,7 +50,7 @@ class HomeScreenTest {
     fun tearDown() {
         scenario.close()
         bestTimesSnapshot.restore()
-        previousLevels.forEach { (difficulty, level) ->
+        previousLevels.forEach { (difficulty: Difficulty, level: Int) ->
             preferences.difficulty = difficulty
             preferences.level = level
         }
@@ -126,7 +127,7 @@ class HomeScreenTest {
     }
 
     private fun checkLevel(level: Int) {
-        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val context: Context = ApplicationProvider.getApplicationContext<android.content.Context>()
         onView(withId(R.id.level_name)).check(
             matches(
                 withText(
@@ -141,7 +142,7 @@ class HomeScreenTest {
 
     private fun resetLevels(): Map<Difficulty, Int> = Difficulty.entries.associateWith {
         preferences.difficulty = it
-        val previous = preferences.level
+        val previous: Int = preferences.level
         preferences.level = 1
         previous
     }

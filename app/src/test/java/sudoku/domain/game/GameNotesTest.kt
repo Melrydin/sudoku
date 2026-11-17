@@ -11,8 +11,8 @@ import sudoku.fixtures.TestBoards
 class GameNotesTest {
     @Test
     fun prefillUsesOnlyRowColumnAndBoxConstraints() {
-        val state = SamplePuzzle.create()
-        val notes = GameNotes.prefill(state.board)
+        val state: GameState = SamplePuzzle.create()
+        val notes: List<Set<Int>> = GameNotes.prefill(state.board)
         assertEquals(setOf(1, 2, 4), notes[2])
         assertTrue(state.board.cells.indices.filter { state.board[it] != 0 }
             .all { notes[it].isEmpty() })
@@ -27,8 +27,8 @@ class GameNotesTest {
 
     @Test
     fun entryRemovesOnlyMatchingNotesFromPeersAndUndoRestoresThem() {
-        val state = notedState()
-        val session = GameSession(state)
+        val state: GameState = notedState()
+        val session: GameSession = GameSession(state)
         session.enter(1, autoRemoveNotes = true)
         assertTrue(session.state.notes[0].isEmpty())
         listOf(8, 72, 10).forEach { assertEquals(setOf(2), session.state.notes[it]) }
@@ -40,7 +40,7 @@ class GameNotesTest {
 
     @Test
     fun disabledCleanupKeepsPeerNotes() {
-        val session = GameSession(notedState())
+        val session: GameSession = GameSession(notedState())
         session.enter(1, autoRemoveNotes = false)
         listOf(8, 72, 10, 40).forEach { assertEquals(setOf(1, 2), session.state.notes[it]) }
         assertTrue(session.state.notes[0].isEmpty())
@@ -48,7 +48,7 @@ class GameNotesTest {
 
     @Test
     fun enteringANoteDoesNotRemoveNotesFromPeers() {
-        val session = GameSession(notedState().copy(noteMode = true))
+        val session: GameSession = GameSession(notedState().copy(noteMode = true))
         session.enter(1, autoRemoveNotes = true)
         assertEquals(setOf(2), session.state.notes[0])
         assertEquals(setOf(1, 2), session.state.notes[8])
@@ -57,12 +57,12 @@ class GameNotesTest {
 
     @Test
     fun givensAndCompletedGamesIgnoreCleanup() {
-        val session = GameSession(SamplePuzzle.create())
+        val session: GameSession = GameSession(SamplePuzzle.create())
         session.select(0)
         session.enter(1, autoRemoveNotes = true)
         assertFalse(session.canUndo)
         assertEquals(5, session.state.board[0])
-        val completed =
+        val completed: GameSession =
             GameSession(GameState(TestBoards.empty(), TestBoards.solved(), selectedCell = 0))
         completed.enter(1, autoRemoveNotes = true)
         assertFalse(completed.canUndo)

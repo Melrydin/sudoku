@@ -12,8 +12,8 @@ class AppContainer(context: Context) {
     val games: GameRepository = SharedPreferencesGameRepository(context.applicationContext)
     val bestTimes: BestTimeRepository =
         SharedPreferencesBestTimeRepository(context.applicationContext)
-    val appPreferences = AppPreferences(context.applicationContext)
-    val gamePreferences = GamePreferences(context.applicationContext)
+    val appPreferences: AppPreferences = AppPreferences(context.applicationContext)
+    val gamePreferences: GamePreferences = GamePreferences(context.applicationContext)
 }
 
 internal val Context.appContainer: AppContainer

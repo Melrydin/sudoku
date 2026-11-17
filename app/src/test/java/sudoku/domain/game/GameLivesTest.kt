@@ -6,9 +6,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import sudoku.data.puzzle.SamplePuzzle
 import sudoku.domain.board.SudokuRules
+import sudoku.domain.common.OptionalValue
 
 class GameLivesTest {
-    private val session = GameSession(SamplePuzzle.create())
+    private val session: GameSession = GameSession(SamplePuzzle.create())
 
     @Test
     fun aWrongButConflictFreeEntryCostsOneLife() {
@@ -79,9 +80,9 @@ class GameLivesTest {
     fun reconstructingASessionKeepsItsMistakesAndSolution() {
         session.select(2)
         session.enter(1)
-        val restored = GameSession(
+        val restored: GameSession = GameSession(
             session.state, session.undoHistory,
-            initialSolution = session.solution, initialMistakes = session.mistakes
+            initialSolution = OptionalValue.Present(session.solution), initialMistakes = session.mistakes
         )
         restored.undo()
         assertEquals(2, restored.remainingLives)

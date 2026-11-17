@@ -13,10 +13,10 @@ class PreferenceSnapshot(private val context: Context, private vararg val names:
     }
 
     fun restore() {
-        saved.forEach { (name, values) ->
+        saved.forEach { (name: String, values: Map<String, *>) ->
             preferences(name).edit(commit = true) {
                 clear()
-                values.forEach { (key, value) -> restoreValue(this, key, value) }
+                values.entries.forEach { entry: Map.Entry<String, *> -> restoreValue(this, entry.key, entry.value) }
             }
         }
         saved = emptyMap()

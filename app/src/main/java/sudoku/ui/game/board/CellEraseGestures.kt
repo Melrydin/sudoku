@@ -6,8 +6,8 @@ import android.view.MotionEvent
 import sudoku.domain.settings.GameOptions
 
 class CellEraseGestures(context: Context, private val erase: () -> Unit) {
-    var options = GameOptions()
-    private val detector =
+    var options: GameOptions = GameOptions()
+    private val detector: GestureDetector =
         GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
             override fun onDown(event: MotionEvent): Boolean = true
 

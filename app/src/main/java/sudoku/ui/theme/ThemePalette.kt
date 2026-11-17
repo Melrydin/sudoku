@@ -16,9 +16,9 @@ class ThemePalette(
     private val selected: ColorTheme,
     private val onSelected: (ColorTheme) -> Unit,
 ) {
-    private val colors = ThemeColors(context)
-    private val row = LinearLayout(context)
-    private val popup = PopupWindow(row, dp(56 * ColorTheme.entries.size + 8), dp(56), true)
+    private val colors: ThemeColors = ThemeColors(context)
+    private val row: LinearLayout = LinearLayout(context)
+    private val popup: PopupWindow = PopupWindow(row, dp(56 * ColorTheme.entries.size + 8), dp(56), true)
 
     fun show(anchor: View) {
         row.gravity = Gravity.CENTER
@@ -27,16 +27,16 @@ class ThemePalette(
         popup.setBackgroundDrawable(panel())
         popup.isOutsideTouchable = true
         popup.elevation = dp(4).toFloat()
-        val position = IntArray(2)
+        val position: IntArray = IntArray(2)
         anchor.getLocationOnScreen(position)
-        val x = (position[0] + anchor.width - popup.width).coerceAtLeast(dp(8))
+        val x: Int = (position[0] + anchor.width - popup.width).coerceAtLeast(dp(8))
         popup.showAtLocation(anchor, Gravity.TOP or Gravity.START, x, position[1])
     }
 
     private fun themeButton(theme: ColorTheme): ImageButton = ImageButton(context).apply {
         layoutParams = LinearLayout.LayoutParams(dp(56), dp(56))
-        val preview = ThemeColors(ContextThemeWrapper(context, theme.style))
-        val outer = circle(preview.background).apply {
+        val preview: ThemeColors = ThemeColors(ContextThemeWrapper(context, theme.style))
+        val outer: GradientDrawable = circle(preview.background).apply {
             setStroke(dp(if (theme == selected) 3 else 1), preview.accent)
         }
         background = LayerDrawable(arrayOf(outer, circle(preview.accent))).apply {

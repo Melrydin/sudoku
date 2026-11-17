@@ -1,9 +1,11 @@
 package sudoku.ui.game
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.AdaptiveIconDrawable
+import android.graphics.drawable.Drawable
 import android.os.SystemClock
 import android.view.View
 import androidx.core.content.edit
@@ -14,6 +16,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.Espresso.pressBack
+import androidx.test.espresso.ViewInteraction
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.doubleClick
 import androidx.test.espresso.action.ViewActions.longClick
@@ -33,8 +36,6 @@ import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.equalTo
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -46,6 +47,8 @@ import sudoku.data.preferences.AppPreferences
 import sudoku.data.preferences.GamePreferences
 import sudoku.data.puzzle.SamplePuzzle
 import sudoku.data.statistics.SharedPreferencesBestTimeRepository
+import sudoku.domain.board.SudokuBoard
+import sudoku.domain.common.OptionalValue
 import sudoku.domain.game.GameNotes
 import sudoku.domain.game.GameSession
 import sudoku.domain.game.GameState
@@ -67,17 +70,17 @@ import sudoku.ui.home.MainActivity
 @RunWith(AndroidJUnit4::class)
 class GameScreenTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val games by lazy { SharedPreferencesGameRepository(context) }
-    private val bestTimesSnapshot = PreferenceSnapshot(context, "best_times")
-    private val easyPuzzle = PuzzleId(Difficulty.EASY, version = GeneratorConfig.VERSION)
-    private val preferences = context.getSharedPreferences("games", Context.MODE_PRIVATE)
+    private val games: SharedPreferencesGameRepository by lazy { SharedPreferencesGameRepository(context) }
+    private val bestTimesSnapshot: PreferenceSnapshot = PreferenceSnapshot(context, "best_times")
+    private val easyPuzzle: PuzzleId = PuzzleId(Difficulty.EASY, version = GeneratorConfig.VERSION)
+    private val preferences: SharedPreferences = context.getSharedPreferences("games", Context.MODE_PRIVATE)
     private var previousGames: Map<String, *> = emptyMap<String, String>()
     private lateinit var scenario: ActivityScenario<GameActivity>
-    private val homePreferences = AppPreferences(context)
+    private val homePreferences: AppPreferences = AppPreferences(context)
     private lateinit var previousTheme: ColorTheme
     private lateinit var previousDifficulty: Difficulty
     private var previousEasyLevel: Int = 1
-    private val gamePreferences = GamePreferences(context)
+    private val gamePreferences: GamePreferences = GamePreferences(context)
     private lateinit var previousOptions: GameOptions
 
     @Before
@@ -103,7 +106,7 @@ class GameScreenTest {
         bestTimesSnapshot.restore()
         preferences.edit {
             clear()
-            previousGames.forEach { (key, value) -> putString(key, value as String) }
+            previousGames.entries.forEach { entry: Map.Entry<String, *> -> putString(entry.key, entry.value as String) }
         }
         homePreferences.theme = previousTheme
         homePreferences.difficulty = Difficulty.EASY
@@ -135,7 +138,7 @@ class GameScreenTest {
         cell(2).check(matches(withContentDescription("Zeile 1, Spalte 3, Notizen: 4, bearbeitbar")))
         onView(withId(R.id.notes)).check(matches(withContentDescription(R.string.notes_enabled)))
         onView(withId(R.id.undo)).perform(scrollTo(), click())
-        assertTrue(games.load(easyPuzzle)!!.state.notes[2].isEmpty())
+        assertTrue(games.load(easyPuzzle).get().state.notes[2].isEmpty())
     }
 
     @Test
@@ -163,11 +166,11 @@ class GameScreenTest {
     fun savedGamesAreIndependentAndMalformedDataIsIgnored() {
         cell(2).perform(click())
         number(4).perform(scrollTo(), click())
-        val store = games
-        assertNotNull(store.load(easyPuzzle))
-        assertNull(store.load(PuzzleId(Difficulty.HARD)))
-        assertNull(GameStateCodec.decode("broken json"))
-        assertEquals(4, store.load(easyPuzzle)!!.state.board[2])
+        val store: SharedPreferencesGameRepository = games
+        org.junit.Assert.assertTrue(store.load(easyPuzzle).isPresent)
+        assertEquals(OptionalValue.Absent, store.load(PuzzleId(Difficulty.HARD)))
+        assertEquals(OptionalValue.Absent, GameStateCodec.decode("broken json"))
+        assertEquals(4, store.load(easyPuzzle).get().state.board[2])
     }
 
     @Test
@@ -187,13 +190,13 @@ class GameScreenTest {
         ActivityScenario.launch(MainActivity::class.java).use {
             onView(withId(R.id.new_game)).perform(click())
             waitForGame()
-            val editable = games.load(easyPuzzle)!!.state.puzzle.cells.indexOf(0)
+            val editable: Int = games.load(easyPuzzle).get().state.puzzle.cells.indexOf(0)
             cell(editable).perform(click())
-            assertEquals(editable, games.load(easyPuzzle)!!.state.selectedCell)
+            assertEquals(editable, games.load(easyPuzzle).get().state.selectedCell)
             number(4).perform(scrollTo(), click())
-            assertEquals(4, games.load(easyPuzzle)!!.state.board[editable])
+            assertEquals(4, games.load(easyPuzzle).get().state.board[editable])
             pressBack()
-            assertEquals(4, games.load(easyPuzzle)!!.state.board[editable])
+            assertEquals(4, games.load(easyPuzzle).get().state.board[editable])
             onView(withId(R.id.continue_game)).check(matches(isDisplayed()))
             onView(withId(R.id.continue_game)).perform(click())
             cell(editable).check(matches(withText("4")))
@@ -203,31 +206,31 @@ class GameScreenTest {
 
     @Test
     fun homeContinuesVersionOneProgressWithoutRegeneratingThePuzzle() {
-        val legacy = saveLegacyProgress()
-        val saved = requireNotNull(games.load(legacy))
+        val legacy: PuzzleId = saveLegacyProgress()
+        val saved: GameSession = games.load(legacy).get()
         ActivityScenario.launch(MainActivity::class.java).use {
             onView(withId(R.id.continue_game)).perform(click())
             cell(2).check(matches(withText("4")))
-            assertEquals(saved.id, games.load(legacy)!!.id)
-            assertEquals(saved.state.puzzle.cells, games.load(legacy)!!.state.puzzle.cells)
-            assertNull(games.load(easyPuzzle))
+            assertEquals(saved.id, games.load(legacy).get().id)
+            assertEquals(saved.state.puzzle.cells, games.load(legacy).get().state.puzzle.cells)
+            assertEquals(OptionalValue.Absent, games.load(easyPuzzle))
             pressBack()
         }
     }
 
     @Test
     fun newGamesUseCurrentVersionAfterConfirmingOlderProgress() {
-        val legacy = saveLegacyProgress()
+        val legacy: PuzzleId = saveLegacyProgress()
         ActivityScenario.launch(MainActivity::class.java).use {
             onView(withId(R.id.new_game)).perform(click())
             onView(withText(R.string.cancel)).perform(click())
-            assertNull(games.load(easyPuzzle))
+            assertEquals(OptionalValue.Absent, games.load(easyPuzzle))
             onView(withId(R.id.new_game)).perform(click())
             onView(withText(R.string.new_game)).perform(click())
             waitForGame()
-            val puzzle = requireNotNull(games.load(easyPuzzle)).state.puzzle
+            val puzzle: SudokuBoard = games.load(easyPuzzle).get().state.puzzle
             assertTrue(puzzle.cells.count { it != 0 } in GeneratorConfig.clueRange(Difficulty.EASY))
-            assertEquals(4, games.load(legacy)!!.state.board[2])
+            assertEquals(4, games.load(legacy).get().state.board[2])
             pressBack()
         }
     }
@@ -252,7 +255,7 @@ class GameScreenTest {
         scenario.close()
         ActivityScenario.launch(MainActivity::class.java).use {
             onView(withId(R.id.next_level)).perform(click())
-            val editable = startSelectedLevelAndEnter(4)
+            val editable: Int = startSelectedLevelAndEnter(4)
             pressBack()
             onView(withId(R.id.continue_game)).check(matches(isDisplayed()))
             onView(withId(R.id.next_level)).perform(click())
@@ -270,35 +273,24 @@ class GameScreenTest {
         scenario.close()
         scenario = ActivityScenario.launch(GameActivity.intent(context, easyPuzzle, true))
         waitForGame()
-        val store = games
-        val puzzle = store.load(easyPuzzle)!!.state.puzzle
-        val editable = puzzle.cells.indexOf(0)
-        assertEquals(GameNotes.prefill(puzzle), store.load(easyPuzzle)!!.state.notes)
+        val store: SharedPreferencesGameRepository = games
+        val puzzle: SudokuBoard = store.load(easyPuzzle).get().state.puzzle
+        val editable: Int = puzzle.cells.indexOf(0)
+        assertEquals(GameNotes.prefill(puzzle), store.load(easyPuzzle).get().state.notes)
         cell(editable).perform(click())
         onView(withId(R.id.erase)).perform(scrollTo(), click())
         scenario.recreate()
-        assertTrue(store.load(easyPuzzle)!!.state.notes[editable].isEmpty())
+        assertTrue(store.load(easyPuzzle).get().state.notes[editable].isEmpty())
     }
 
     @Test
     fun enablingPrefillInSettingsUpdatesTheRunningGameAndSupportsUndo() {
         cell(2).perform(click())
         number(4).perform(scrollTo(), click())
-        val before = games.load(easyPuzzle)!!.state
+        val before: GameState = games.load(easyPuzzle).get().state
         togglePrefillInSettings()
         cell(2).check(matches(withText("4")))
-        cell(3).check(
-            matches(
-                withContentDescription(
-                    containsString(
-                        context.getString(
-                            R.string.cell_notes,
-                            "2, 6"
-                        )
-                    )
-                )
-            )
-        )
+        checkNotes(3, "2, 6")
         checkSavedState(before.copy(notes = GameNotes.prefill(before.board)))
         onView(withId(R.id.undo)).perform(scrollTo(), click())
         checkSavedState(before)
@@ -313,29 +305,18 @@ class GameScreenTest {
         scenario.close()
         gamePreferences.options = gamePreferences.options.copy(prefillNotes = true)
         scenario = ActivityScenario.launch(GameActivity.intent(context, easyPuzzle, false))
-        val state = games.load(easyPuzzle)!!.state
+        val state: GameState = games.load(easyPuzzle).get().state
         assertEquals(4, state.board[2])
         assertEquals(GameNotes.prefill(state.board), state.notes)
-        cell(3).check(
-            matches(
-                withContentDescription(
-                    containsString(
-                        context.getString(
-                            R.string.cell_notes,
-                            "2, 6"
-                        )
-                    )
-                )
-            )
-        )
+        checkNotes(3, "2, 6")
     }
 
     @Test
     fun ninthDigitDisappearsAndUndoBringsItsButtonBack() {
         scenario.close()
-        val puzzle = SamplePuzzle.create().puzzle
-        val board = puzzle.cells.indices.filter { puzzle[it] == 0 }.take(5)
-            .fold(puzzle) { current, index -> current.withValue(index, 5) }
+        val puzzle: SudokuBoard = SamplePuzzle.create().puzzle
+        val board: SudokuBoard = puzzle.cells.indices.filter { puzzle[it] == 0 }.take(5)
+            .fold(puzzle) { current: SudokuBoard, index: Int -> current.withValue(index, 5) }
         games.save(easyPuzzle, GameSession(GameState(puzzle, board)))
         scenario = ActivityScenario.launch(GameActivity.intent(context, easyPuzzle, false))
         cell(8).perform(click())
@@ -365,30 +346,30 @@ class GameScreenTest {
     fun timerPausesWithTheActivityAndPersistsElapsedTime() {
         SystemClock.sleep(1_200)
         scenario.moveToState(Lifecycle.State.STARTED)
-        val store = games
-        val paused = requireNotNull(store.load(easyPuzzle)).elapsedMillis
+        val store: SharedPreferencesGameRepository = games
+        val paused: Long = store.load(easyPuzzle).get().elapsedMillis
         assertTrue(paused >= 1_000)
         SystemClock.sleep(1_200)
         scenario.moveToState(Lifecycle.State.RESUMED)
         scenario.moveToState(Lifecycle.State.STARTED)
-        val resumed = requireNotNull(store.load(easyPuzzle)).elapsedMillis
+        val resumed: Long = store.load(easyPuzzle).get().elapsedMillis
         assertTrue(resumed in paused..(paused + 1_000))
     }
 
     @Test
     fun codecPreservesPlayTimeAndReadsOlderGames() {
-        val game = GameSession(SamplePuzzle.create(), initialElapsedMillis = 123_456)
-        val encoded = GameStateCodec.encode(game)
-        assertEquals(123_456L, requireNotNull(GameStateCodec.decode(encoded)).elapsedMillis)
-        val oldSave = org.json.JSONObject(encoded).apply { remove("elapsedMillis") }.toString()
-        assertEquals(0L, requireNotNull(GameStateCodec.decode(oldSave)).elapsedMillis)
+        val game: GameSession = GameSession(SamplePuzzle.create(), initialElapsedMillis = 123_456)
+        val encoded: String = GameStateCodec.encode(game)
+        assertEquals(123_456L, GameStateCodec.decode(encoded).get().elapsedMillis)
+        val oldSave: String = org.json.JSONObject(encoded).apply { remove("elapsedMillis") }.toString()
+        assertEquals(0L, GameStateCodec.decode(oldSave).get().elapsedMillis)
     }
 
     @Test
     fun launcherIconRendersAsAnAdaptiveSudokuIcon() {
-        val icon = context.packageManager.getApplicationIcon(context.packageName)
+        val icon: Drawable = context.packageManager.getApplicationIcon(context.packageName)
         assertTrue(icon is AdaptiveIconDrawable)
-        val bitmap = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_8888)
+        val bitmap: Bitmap = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_8888)
         icon.setBounds(0, 0, bitmap.width, bitmap.height)
         icon.draw(Canvas(bitmap))
         ScreenCapture.save("app-icon.png", bitmap)
@@ -400,7 +381,7 @@ class GameScreenTest {
         scenario = ActivityScenario.launch(GameActivity.intent(context, easyPuzzle, true))
         scenario.recreate()
         waitForGame()
-        val state = games.load(easyPuzzle)!!.state
+        val state: GameState = games.load(easyPuzzle).get().state
         assertEquals(SolutionCount.UNIQUE, SolutionCounter().count(state.puzzle))
         assertTrue(state.puzzle.cells != SamplePuzzle.create().puzzle.cells)
         assertTrue(!state.isComplete && !state.hasEntries)
@@ -414,9 +395,9 @@ class GameScreenTest {
         scenario.close()
         scenario = ActivityScenario.launch(GameActivity.intent(context, easyPuzzle, true))
         waitForGame()
-        val puzzle = games.load(easyPuzzle)!!.state.puzzle
-        val solution = SudokuGenerator(PuzzleRandom.forPuzzle(easyPuzzle)).generate()
-        val editable = puzzle.cells.indexOf(0)
+        val puzzle: SudokuBoard = games.load(easyPuzzle).get().state.puzzle
+        val solution: SudokuBoard = SudokuGenerator(PuzzleRandom.forPuzzle(easyPuzzle)).generate()
+        val editable: Int = puzzle.cells.indexOf(0)
         scenario.close()
         games.save(easyPuzzle, GameSession(GameState(puzzle, solution.withValue(editable, 0))))
         scenario = ActivityScenario.launch(GameActivity.intent(context, easyPuzzle, false))
@@ -427,13 +408,13 @@ class GameScreenTest {
             1,
             SharedPreferencesBestTimeRepository(context).forDifficulty(Difficulty.EASY).size
         )
-        assertTrue(games.load(easyPuzzle)!!.state.isComplete)
+        assertTrue(games.load(easyPuzzle).get().state.isComplete)
     }
 
     private fun startSelectedLevelAndEnter(value: Int): Int {
         onView(withId(R.id.new_game)).perform(click())
         waitForGame()
-        val editable = games.load(homePreferences.puzzleId)!!.state.puzzle.cells.indexOf(0)
+        val editable: Int = games.load(homePreferences.puzzleId).get().state.puzzle.cells.indexOf(0)
         cell(editable).perform(click())
         number(value).perform(scrollTo(), click())
         return editable
@@ -449,7 +430,7 @@ class GameScreenTest {
     }
 
     private fun checkSavedState(expected: GameState) {
-        val actual = games.load(easyPuzzle)!!.state
+        val actual: GameState = games.load(easyPuzzle).get().state
         assertEquals(expected.puzzle.cells, actual.puzzle.cells)
         assertEquals(expected.board.cells, actual.board.cells)
         assertEquals(expected.notes, actual.notes)
@@ -460,8 +441,8 @@ class GameScreenTest {
     private fun saveLegacyProgress(): PuzzleId {
         scenario.close()
         games.delete(easyPuzzle)
-        val legacy = easyPuzzle.copy(version = GeneratorVersion.V1)
-        val session = GameSession(SamplePuzzle.create())
+        val legacy: PuzzleId = easyPuzzle.copy(version = GeneratorVersion.V1)
+        val session: GameSession = GameSession(SamplePuzzle.create())
         session.select(2)
         session.enter(4)
         games.save(legacy, session)
@@ -469,17 +450,22 @@ class GameScreenTest {
     }
 
     private fun checkHeaderBelowStatusBar() {
-        scenario.onActivity { activity ->
-            val header = activity.findViewById<View>(R.id.game_header)
-            val position = IntArray(2)
+        scenario.onActivity { activity: GameActivity ->
+            val header: View = activity.findViewById<View>(R.id.game_header)
+            val position: IntArray = IntArray(2)
             header.getLocationOnScreen(position)
-            val insets = requireNotNull(ViewCompat.getRootWindowInsets(header))
+            val insets: WindowInsetsCompat = requireNotNull(ViewCompat.getRootWindowInsets(header))
             assertTrue(position[1] >= insets.getInsets(WindowInsetsCompat.Type.statusBars()).top)
         }
     }
 
-    private fun cell(index: Int) = onView(withTagValue(equalTo("cell_$index")))
+    private fun cell(index: Int): ViewInteraction = onView(withTagValue(equalTo("cell_$index")))
 
-    private fun number(value: Int) = onView(withTagValue(equalTo("number_$value")))
+    private fun number(value: Int): ViewInteraction = onView(withTagValue(equalTo("number_$value")))
 
+
+    private fun checkNotes(index: Int, notes: String) {
+        val description: String = context.getString(R.string.cell_notes, notes)
+        cell(index).check(matches(withContentDescription(containsString(description))))
+    }
 }

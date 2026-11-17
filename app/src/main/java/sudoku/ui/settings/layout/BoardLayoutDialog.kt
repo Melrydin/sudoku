@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
+import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.slider.Slider
 import sudoku.R
@@ -16,10 +17,10 @@ class BoardLayoutDialog(
     private val onPreview: (BoardLayoutOptions) -> Unit,
     private val onClosed: () -> Unit,
 ) {
-    private val root = LayoutInflater.from(context)
+    private val root: View = LayoutInflater.from(context)
         .inflate(R.layout.dialog_board_layout, FrameLayout(context), false)
-    private val dialog = MaterialAlertDialogBuilder(context).setView(root).create()
-    private var draft = preferences.boardLayout
+    private val dialog: AlertDialog = MaterialAlertDialogBuilder(context).setView(root).create()
+    private var draft: BoardLayoutOptions = preferences.boardLayout
 
     fun show(initial: BoardLayoutOptions = draft) {
         draft = initial
@@ -51,7 +52,7 @@ class BoardLayoutDialog(
     ) {
         root.findViewById<Slider>(id).apply {
             this.value = value
-            addOnChangeListener { _, next, _ ->
+            addOnChangeListener { _, next: Float, _ ->
                 draft = draft.update(next / 100f)
                 onPreview(draft)
             }

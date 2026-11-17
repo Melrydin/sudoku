@@ -11,13 +11,13 @@ class FullHouseDetector : TechniqueDetector {
     override val technique: SolvingTechnique = SolvingTechnique.FULL_HOUSE
 
     override fun findStep(state: LogicalState): TechniqueSearchResult {
-        val board = SudokuUnits.all
+        val board: List<List<Int>> = SudokuUnits.all
 
-        board.forEach { unit ->
-            val emptyCells = unit.filter { cell -> state.board[cell] == 0 }
+        board.forEach { unit: List<Int> ->
+            val emptyCells: List<Int> = unit.filter { cell: Int -> state.board[cell] == 0 }
             if (emptyCells.size == 1 && !foundDuplicates(unit, state)) {
-                val cell = emptyCells.single()
-                val candidate = state.candidates[cell].singleOrNull()
+                val cell: Int = emptyCells.single()
+                val candidate: Int = state.candidates[cell].singleOrNull()
                     ?: return@forEach
                 return TechniqueSearchResult.Found(
                     LogicalStep(
@@ -31,11 +31,11 @@ class FullHouseDetector : TechniqueDetector {
     }
 
     private fun foundDuplicates(candidate: List<Int>, state: LogicalState): Boolean {
-        val number = candidate
-            .map { cell -> state.board[cell] }
-            .filter { value -> value != 0 }
-        val numbers = mutableSetOf<Int>()
-        number.forEach { number ->
+        val number: List<Int> = candidate
+            .map { cell: Int -> state.board[cell] }
+            .filter { value: Int -> value != 0 }
+        val numbers: MutableSet<Int> = mutableSetOf<Int>()
+        number.forEach { number: Int ->
             if (number !in numbers) {
                 numbers.add(number)
             } else {

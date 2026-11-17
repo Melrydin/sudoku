@@ -23,7 +23,7 @@ class HomeScreen(
     private val onContinue: (PuzzleId) -> Unit,
     private val hasSavedGame: (PuzzleId) -> Boolean,
 ) {
-    private val about = AboutDialog(root.context)
+    private val about: AboutDialog = AboutDialog(root.context)
 
     fun bind() {
         bindThemeSelector()
@@ -78,14 +78,14 @@ class HomeScreen(
     }
 
     private fun shiftLevel(step: Int) {
-        val next = preferences.level.toLong() + step
+        val next: Long = preferences.level.toLong() + step
         if (next !in 1L..Int.MAX_VALUE.toLong()) return
         preferences.level = next.toInt()
         renderSelection()
     }
 
     private fun renderSelection() {
-        val label = root.findViewById<TextView>(R.id.difficulty_name)
+        val label: TextView = root.findViewById<TextView>(R.id.difficulty_name)
         label.setText(preferences.difficulty.label)
         label.contentDescription =
             root.context.getString(R.string.difficulty_description, label.text)

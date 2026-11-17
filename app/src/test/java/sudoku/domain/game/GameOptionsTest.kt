@@ -8,16 +8,16 @@ import sudoku.domain.settings.GameOptions
 import sudoku.fixtures.TestBoards
 
 class GameOptionsTest {
-    private val session = GameSession(SamplePuzzle.create())
-    private val enabled = GameOptions(false, false, true, false, false)
-    private val disabled = enabled.copy(prefillNotes = false)
+    private val session: GameSession = GameSession(SamplePuzzle.create())
+    private val enabled: GameOptions = GameOptions(false, false, true, false, false)
+    private val disabled: GameOptions = enabled.copy(prefillNotes = false)
 
     @Test
     fun enablingPrefillUsesCurrentEntriesAndPreservesGameProgress() {
         session.select(2)
         session.enter(4)
         session.trackElapsedTime(1_234)
-        val before = session.state
+        val before: GameState = session.state
         session.applyOptions(enabled)
         assertEquals(before.copy(notes = GameNotes.prefill(before.board)), session.state)
         assertEquals(1_234L, session.elapsedMillis)
@@ -42,7 +42,7 @@ class GameOptionsTest {
         session.applyOptions(enabled)
         session.select(2)
         session.erase()
-        val edited = session.state
+        val edited: GameState = session.state
         session.applyOptions(disabled)
         assertEquals(edited, session.state)
         session.applyOptions(enabled)
@@ -55,7 +55,7 @@ class GameOptionsTest {
         session.select(2)
         session.toggleNotes()
         session.enter(1)
-        val before = session.state
+        val before: GameState = session.state
         session.applyOptions(enabled)
         session.undo()
         assertEquals(before, session.state)
@@ -66,7 +66,7 @@ class GameOptionsTest {
 
     @Test
     fun newPrefilledGamesDoNotGainAnExtraUndoStep() {
-        val game = NewGameFactory.fromPuzzle(SamplePuzzle.create().puzzle, true)
+        val game: GameSession = NewGameFactory.fromPuzzle(SamplePuzzle.create().puzzle, true)
         game.select(2)
         game.erase()
         game.applyOptions(enabled)
@@ -76,10 +76,10 @@ class GameOptionsTest {
 
     @Test
     fun completedAndFailedGamesIgnorePrefilling() {
-        val completed = GameSession(GameState(TestBoards.solved()))
-        val failed = GameSession(SamplePuzzle.create(), initialMistakes = GameSession.MAX_MISTAKES)
-        listOf(completed, failed).forEach { game ->
-            val before = game.state
+        val completed: GameSession = GameSession(GameState(TestBoards.solved()))
+        val failed: GameSession = GameSession(SamplePuzzle.create(), initialMistakes = GameSession.MAX_MISTAKES)
+        listOf(completed, failed).forEach { game: GameSession ->
+            val before: GameState = game.state
             game.applyOptions(enabled)
             assertEquals(before, game.state)
             assertEquals(0, game.assistancePoints)

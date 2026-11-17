@@ -5,10 +5,10 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import sudoku.domain.common.OptionalValue
 import sudoku.domain.puzzle.Difficulty
 import sudoku.domain.puzzle.PuzzleId
 import sudoku.domain.statistics.GameResult
@@ -17,30 +17,30 @@ import sudoku.testing.PreferenceSnapshot
 @RunWith(AndroidJUnit4::class)
 class BestTimeRepositoryTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val store = SharedPreferencesBestTimeRepository(context)
-    private val snapshot = PreferenceSnapshot(context, "best_times")
+    private val store: SharedPreferencesBestTimeRepository = SharedPreferencesBestTimeRepository(context)
+    private val snapshot: PreferenceSnapshot = PreferenceSnapshot(context, "best_times")
 
     @Before
-    fun setUp() = snapshot.captureAndClear()
+    fun setUp(): Unit = snapshot.captureAndClear()
 
     @After
-    fun tearDown() = snapshot.restore()
+    fun tearDown(): Unit = snapshot.restore()
 
     @Test
     fun ranksByTimeBeforeAssistancePoints() {
         store.record(result("slow", 60_000, 0))
         store.record(result("fast", 10_000, 5))
-        val entries = store.forDifficulty(Difficulty.EASY)
+        val entries: List<GameResult> = store.forDifficulty(Difficulty.EASY)
         assertEquals(listOf("fast", "slow"), entries.map { it.gameId })
         assertEquals(listOf(5, 0), entries.map { it.assistancePoints })
     }
 
     @Test
     fun aGameCanOnlyBeRecordedOnce() {
-        val first = result("same-game", 60_000, 4)
+        val first: GameResult = result("same-game", 60_000, 4)
         store.record(first)
         store.record(result("same-game", 5_000, 0))
-        assertEquals(first, store.find("same-game"))
+        assertEquals(first, store.find("same-game").get())
         assertEquals(1, store.forDifficulty(Difficulty.EASY).size)
     }
 
@@ -54,9 +54,9 @@ class BestTimeRepositoryTest {
 
     @Test
     fun resultsSurviveCreatingANewRepository() {
-        val record = result("saved", 125_456, 3)
+        val record: GameResult = result("saved", 125_456, 3)
         store.record(record)
-        assertEquals(record, SharedPreferencesBestTimeRepository(context).find(record.gameId))
+        assertEquals(record, SharedPreferencesBestTimeRepository(context).find(record.gameId).get())
     }
 
     @Test
@@ -64,7 +64,7 @@ class BestTimeRepositoryTest {
         context.getSharedPreferences("best_times", Context.MODE_PRIVATE).edit()
             .putString("broken", "oops").commit()
         store.record(result("valid", 20_000, 1))
-        assertNull(store.find("broken"))
+        assertEquals(OptionalValue.Absent, store.find("broken"))
         assertEquals(listOf("valid"), store.forDifficulty(Difficulty.EASY).map { it.gameId })
     }
 

@@ -19,11 +19,8 @@ import sudoku.ui.statistics.TimesActivity
 class VictoryActivity : ThemedActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val id = intent.getStringExtra(EXTRA_GAME_ID).orEmpty()
-        val result = appContainer.bestTimes.find(id)
-        if (result == null) {
-            finish(); return
-        }
+        val id: String = intent.getStringExtra(EXTRA_GAME_ID).orEmpty()
+        val result: GameResult = appContainer.bestTimes.find(id).getOrElse { finish(); return }
         setContentView(R.layout.activity_victory)
         applySystemInsets(findViewById(R.id.victory_root))
         render(result)
@@ -58,13 +55,13 @@ class VictoryActivity : ThemedActivity() {
             startActivity(Intent(this, TimesActivity::class.java))
         }
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() =
+            override fun handleOnBackPressed(): Unit =
                 HomeNavigation.open(this@VictoryActivity, result.puzzle)
         })
     }
 
     companion object {
-        private const val EXTRA_GAME_ID = "game_id"
+        private const val EXTRA_GAME_ID: String = "game_id"
 
         fun intent(context: Context, gameId: String): Intent =
             Intent(context, VictoryActivity::class.java).putExtra(EXTRA_GAME_ID, gameId)

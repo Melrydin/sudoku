@@ -12,11 +12,11 @@ import sudoku.domain.puzzle.GeneratorVersion
 class TechniqueRegistryTest {
     @Test
     fun defaultsRegisterEveryTechniqueAndUsePolicyOrderForEachVersion() {
-        val registered = defaultTechniqueDetectors()
+        val registered: List<TechniqueDetector> = defaultTechniqueDetectors()
         assertEquals(SolvingTechnique.entries.size, registered.size)
         assertEquals(SolvingTechnique.entries.toSet(), registered.map { it.technique }.toSet())
-        GeneratorVersion.entries.forEach { version ->
-            val ordered = TechniqueRegistry().ordered(version)
+        GeneratorVersion.entries.forEach { version: GeneratorVersion ->
+            val ordered: List<TechniqueDetector> = TechniqueRegistry().ordered(version)
             assertTrue(ordered.first() is FullHouseDetector)
             assertEquals(
                 TechniquePolicy.rules(version).map { it.technique },
@@ -26,10 +26,10 @@ class TechniqueRegistryTest {
 
     @Test
     fun injectedDetectorsFollowPolicyOrderRatherThanRegistrationOrder() {
-        val fullHouse = detector(SolvingTechnique.FULL_HOUSE)
-        val xWing = detector(SolvingTechnique.X_WING)
-        val registry = TechniqueRegistry(listOf(xWing, fullHouse))
-        val ordered = registry.ordered(GeneratorVersion.V1)
+        val fullHouse: TechniqueDetector = detector(SolvingTechnique.FULL_HOUSE)
+        val xWing: TechniqueDetector = detector(SolvingTechnique.X_WING)
+        val registry: TechniqueRegistry = TechniqueRegistry(listOf(xWing, fullHouse))
+        val ordered: List<TechniqueDetector> = registry.ordered(GeneratorVersion.V1)
         assertSame(fullHouse, ordered.first())
         assertSame(xWing, ordered.single { it.technique == SolvingTechnique.X_WING })
         assertEquals(

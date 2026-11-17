@@ -17,15 +17,15 @@ import sudoku.ui.theme.ThemeColors
 
 class SudokuCellView @JvmOverloads constructor(context: Context, private val index: Int = 0) :
     AppCompatTextView(context) {
-    private val colors = ThemeColors(context)
-    private val notePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    private val colors: ThemeColors = ThemeColors(context)
+    private val notePaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         textAlign = Paint.Align.CENTER
         color = colors.muted
     }
     private var notes: Set<Int> = emptySet()
     var onErase: () -> Unit = {}
-    private val decoration = CellDecoration(colors, ::invalidate)
-    private val gestures = CellEraseGestures(context) { onErase() }
+    private val decoration: CellDecoration = CellDecoration(colors, ::invalidate)
+    private val gestures: CellEraseGestures = CellEraseGestures(context) { onErase() }
 
     init {
         gravity = Gravity.CENTER
@@ -40,7 +40,7 @@ class SudokuCellView @JvmOverloads constructor(context: Context, private val ind
         gestures.options = options
         isLongClickable = options.holdToErase
         decoration.update(state, index, options)
-        val given = state.puzzle[index] != 0
+        val given: Boolean = state.puzzle[index] != 0
         text = state.board[index].takeIf { it != 0 }?.let { context.formatNumber(it) }.orEmpty()
         typeface = if (given) Typeface.DEFAULT_BOLD else Typeface.create(
             "sans-serif-light",
@@ -64,14 +64,14 @@ class SudokuCellView @JvmOverloads constructor(context: Context, private val ind
     override fun onDraw(canvas: Canvas) {
         decoration.draw(canvas, width, height)
         super.onDraw(canvas)
-        notes.forEach { value -> drawNote(canvas, value) }
+        notes.forEach { value: Int -> drawNote(canvas, value) }
     }
 
     private fun drawNote(canvas: Canvas, value: Int) {
-        val column = (value - 1) % SudokuBoard.BOX_SIZE
-        val row = (value - 1) / SudokuBoard.BOX_SIZE
-        val x = width * (column + 0.5f) / SudokuBoard.BOX_SIZE
-        val y = height * (row + 0.5f) / SudokuBoard.BOX_SIZE
+        val column: Int = (value - 1) % SudokuBoard.BOX_SIZE
+        val row: Int = (value - 1) / SudokuBoard.BOX_SIZE
+        val x: Float = width * (column + 0.5f) / SudokuBoard.BOX_SIZE
+        val y: Float = height * (row + 0.5f) / SudokuBoard.BOX_SIZE
         canvas.drawText(
             context.formatNumber(value),
             x,
@@ -93,8 +93,8 @@ class SudokuCellView @JvmOverloads constructor(context: Context, private val ind
     }
 
     private fun description(state: GameState, given: Boolean, conflict: Boolean): String {
-        val position = context.getString(R.string.cell_position, index / 9 + 1, index % 9 + 1)
-        val value = when {
+        val position: String = context.getString(R.string.cell_position, index / 9 + 1, index % 9 + 1)
+        val value: String = when {
             state.board[index] != 0 -> state.board[index].toString()
             notes.isNotEmpty() -> context.getString(
                 R.string.cell_notes,
@@ -103,8 +103,8 @@ class SudokuCellView @JvmOverloads constructor(context: Context, private val ind
 
             else -> context.getString(R.string.cell_empty)
         }
-        val kind = context.getString(if (given) R.string.cell_given else R.string.cell_editable)
-        val warning = if (conflict) context.getString(R.string.cell_conflict) else ""
+        val kind: String = context.getString(if (given) R.string.cell_given else R.string.cell_editable)
+        val warning: String = if (conflict) context.getString(R.string.cell_conflict) else ""
         return "$position, $value, $kind$warning"
     }
 }

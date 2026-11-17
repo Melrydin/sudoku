@@ -18,7 +18,7 @@ import sudoku.domain.settings.GameOptions
 @RunWith(AndroidJUnit4::class)
 class GamePreferencesTest {
     private val base: Context = ApplicationProvider.getApplicationContext()
-    private val isolated = object : ContextWrapper(base) {
+    private val isolated: ContextWrapper = object : ContextWrapper(base) {
         override fun getSharedPreferences(name: String, mode: Int): SharedPreferences =
             base.getSharedPreferences("sudoku_defaults_test_$name", mode)
     }
@@ -35,7 +35,7 @@ class GamePreferencesTest {
 
     @Test
     fun freshSettingsUseTheDefaultsCapturedFromThePixel() {
-        val preferences = GamePreferences(isolated)
+        val preferences: GamePreferences = GamePreferences(isolated)
         assertFalse(preferences.options.circleGivens)
         assertTrue(preferences.options.highlightSameDigits)
         assertTrue(preferences.options.showRemainingCount)

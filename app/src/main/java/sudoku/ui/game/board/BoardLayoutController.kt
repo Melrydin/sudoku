@@ -8,12 +8,14 @@ import sudoku.R
 import sudoku.domain.settings.BoardLayoutOptions
 
 class BoardLayoutController(root: View) {
-    private val area = root.findViewById<View>(R.id.board_area)
-    private val board = root.findViewById<View>(R.id.sudoku_board)
-    private var options = BoardLayoutOptions()
+    private val area: View = root.findViewById<View>(R.id.board_area)
+    private val board: View = root.findViewById<View>(R.id.sudoku_board)
+    private var options: BoardLayoutOptions = BoardLayoutOptions()
 
     init {
-        area.addOnLayoutChangeListener { _, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+        area.addOnLayoutChangeListener {
+                _, left: Int, top: Int, right: Int, bottom: Int,
+                oldLeft: Int, oldTop: Int, oldRight: Int, oldBottom: Int ->
             if (right - left != oldRight - oldLeft || bottom - top != oldBottom - oldTop) update()
         }
     }
@@ -24,8 +26,8 @@ class BoardLayoutController(root: View) {
     }
 
     private fun update() {
-        val maxSize = (600 * area.resources.displayMetrics.density).toInt()
-        val size = minOf((area.width * options.widthFraction).toInt(), area.height, maxSize)
+        val maxSize: Int = (600 * area.resources.displayMetrics.density).toInt()
+        val size: Int = minOf((area.width * options.widthFraction).toInt(), area.height, maxSize)
         if (size <= 0) return
         board.updateLayoutParams<ConstraintLayout.LayoutParams> {
             width = size

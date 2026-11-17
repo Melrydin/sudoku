@@ -4,9 +4,11 @@ import android.content.Context
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.ViewInteraction
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.Visibility
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility
@@ -18,8 +20,6 @@ import org.hamcrest.Matchers.equalTo
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -29,11 +29,13 @@ import sudoku.data.preferences.AppPreferences
 import sudoku.data.preferences.GamePreferences
 import sudoku.data.puzzle.SamplePuzzle
 import sudoku.data.statistics.SharedPreferencesBestTimeRepository
+import sudoku.domain.common.OptionalValue
 import sudoku.domain.game.GameSession
 import sudoku.domain.game.GameState
 import sudoku.domain.puzzle.Difficulty
 import sudoku.domain.puzzle.PuzzleId
 import sudoku.domain.settings.GameOptions
+import sudoku.domain.statistics.GameResult
 import sudoku.testing.PreferenceSnapshot
 import sudoku.testing.ScreenCapture
 import sudoku.testing.finishTestActivities
@@ -42,10 +44,10 @@ import sudoku.ui.common.PlayTimeFormatter
 @RunWith(AndroidJUnit4::class)
 class GameOutcomeTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val snapshot = PreferenceSnapshot(context, "games", "best_times", "home", "settings")
-    private val games = SharedPreferencesGameRepository(context)
-    private val bestTimes = SharedPreferencesBestTimeRepository(context)
-    private val puzzle = PuzzleId(Difficulty.EASY)
+    private val snapshot: PreferenceSnapshot = PreferenceSnapshot(context, "games", "best_times", "home", "settings")
+    private val games: SharedPreferencesGameRepository = SharedPreferencesGameRepository(context)
+    private val bestTimes: SharedPreferencesBestTimeRepository = SharedPreferencesBestTimeRepository(context)
+    private val puzzle: PuzzleId = PuzzleId(Difficulty.EASY)
     private lateinit var scenario: ActivityScenario<GameActivity>
 
     @Before
@@ -81,51 +83,43 @@ class GameOutcomeTest {
         games.save(puzzle.copy(level = 2), GameSession(SamplePuzzle.create()))
         loseGame()
         onView(withText(R.string.game_over)).check(matches(isDisplayed()))
-        assertNull(games.load(puzzle))
-        assertNotNull(games.load(puzzle.copy(level = 2)))
+        assertEquals(OptionalValue.Absent, games.load(puzzle))
+        org.junit.Assert.assertTrue(games.load(puzzle.copy(level = 2)).isPresent)
         assertEquals(0, bestTimes.forDifficulty(Difficulty.EASY).size)
         scenario.recreate()
-        onView(withText(R.string.game_over_message)).check(matches(isDisplayed()))
+        onView(withText(R.string.game_over_message)).inRoot(isDialog()).check(matches(isDisplayed()))
         ScreenCapture.capture("game-over.png")
         onView(withText(R.string.back_home)).perform(click())
         onView(withId(R.id.continue_game)).check(matches(withEffectiveVisibility(Visibility.INVISIBLE)))
         onView(withId(R.id.new_game)).perform(click())
         waitForGame()
         checkLives(3)
-        assertFalse(games.load(puzzle)!!.state.hasEntries)
+        assertFalse(games.load(AppPreferences(context).puzzleId).get().state.hasEntries)
     }
 
     @Test
     fun victoryShowsTheRecordedTimeAndAssistanceAndOpensTheRanking() {
-        val game = prepareWinningGame()
+        val game: GameSession = prepareWinningGame()
         number(4).perform(scrollTo(), click())
-        val result = requireNotNull(bestTimes.find(game.id))
-        val time = PlayTimeFormatter.format(result.elapsedMillis)
+        val result: GameResult = bestTimes.find(game.id).get()
+        val time: String = PlayTimeFormatter.format(result.elapsedMillis)
         onView(withId(R.id.victory_time)).check(matches(withText(time)))
-        val assistance = context.getString(R.string.assistance_points, 4, 5)
+        val assistance: String = context.getString(R.string.assistance_points, 4, 5)
         onView(withId(R.id.victory_assistance)).check(matches(withText(assistance)))
         assertEquals(1, bestTimes.forDifficulty(Difficulty.EASY).size)
         ScreenCapture.capture("victory.png")
         onView(withId(R.id.victory_best_times)).perform(scrollTo(), click())
         onView(withId(R.id.result_time)).check(matches(withText(time)))
-        onView(withId(R.id.result_level)).check(
-            matches(
-                withText(
-                    context.getString(
-                        R.string.level_number,
-                        1
-                    )
-                )
-            )
-        )
+        val level: String = context.getString(R.string.level_number, 1)
+        onView(withId(R.id.result_level)).check(matches(withText(level)))
         ScreenCapture.capture("best-times.png")
     }
 
     @Test
     fun reopeningACompletedGameDoesNotDuplicateItsResult() {
-        val game = prepareWinningGame()
+        val game: GameSession = prepareWinningGame()
         number(4).perform(scrollTo(), click())
-        val first = bestTimes.find(game.id)
+        val first: OptionalValue<GameResult> = bestTimes.find(game.id)
         scenario = ActivityScenario.launch(GameActivity.intent(context, puzzle, false))
         onView(withId(R.id.victory_title)).check(matches(isDisplayed()))
         assertEquals(1, bestTimes.forDifficulty(Difficulty.EASY).size)
@@ -134,11 +128,14 @@ class GameOutcomeTest {
 
     private fun prepareWinningGame(): GameSession {
         scenario.close()
-        val original = GameSession(SamplePuzzle.create())
-        val state =
+        val original: GameSession = GameSession(SamplePuzzle.create())
+        val state: GameState =
             GameState(original.state.puzzle, original.solution.withValue(2, 0), selectedCell = 2)
-        val game =
-            GameSession(state, initialElapsedMillis = 125_000, initialSolution = original.solution)
+        val game: GameSession =
+            GameSession(
+                state, initialElapsedMillis = 125_000,
+                initialSolution = OptionalValue.Present(original.solution),
+            )
         games.save(puzzle, game)
         scenario = ActivityScenario.launch(GameActivity.intent(context, puzzle, false))
         return game
@@ -163,7 +160,7 @@ class GameOutcomeTest {
         )
     }
 
-    private fun cell(index: Int) = onView(withTagValue(equalTo("cell_$index")))
+    private fun cell(index: Int): ViewInteraction = onView(withTagValue(equalTo("cell_$index")))
 
-    private fun number(value: Int) = onView(withTagValue(equalTo("number_$value")))
+    private fun number(value: Int): ViewInteraction = onView(withTagValue(equalTo("number_$value")))
 }

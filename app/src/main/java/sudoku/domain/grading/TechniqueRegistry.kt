@@ -5,7 +5,7 @@ import sudoku.domain.puzzle.Difficulty
 import sudoku.domain.puzzle.GeneratorVersion
 
 class TechniqueRegistry(detectors: List<TechniqueDetector> = defaultTechniqueDetectors()) {
-    private val byTechnique = detectors.associateBy { it.technique }
+    private val byTechnique: Map<SolvingTechnique, TechniqueDetector> = detectors.associateBy { it.technique }
 
     init {
         require(byTechnique.size == detectors.size) { "A technique may only have one detector." }

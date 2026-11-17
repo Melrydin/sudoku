@@ -12,26 +12,19 @@ class HiddenPairDetector : TechniqueDetector {
 
     override fun findStep(state: LogicalState): TechniqueSearchResult {
         val units: List<List<Int>> = SudokuUnits.all
-
-        units.forEach { unit ->
-            for (digit in 1..9) {
-                val candidateCells = unit.filter { cell -> digit in state.candidates[cell] }
+        units.forEach { unit: List<Int> ->
+            for (digit: Int in 1..9) {
+                val candidateCells: List<Int> = unit.filter { cell: Int -> digit in state.candidates[cell] }
                 if (candidateCells.size != 2) continue
 
-                val otherDigit = findMatchingDigit(unit, digit, candidateCells, state)
-
+                val otherDigit: Int = findMatchingDigit(unit, digit, candidateCells, state)
                 if (otherDigit == 0) continue
 
-                val pairDigits = setOf(digit, otherDigit)
-                val eliminations = findEliminations(candidateCells, pairDigits, state)
+                val pairDigits: Set<Int> = setOf(digit, otherDigit)
+                val eliminations: Map<Int, Set<Int>> = findEliminations(candidateCells, pairDigits, state)
 
                 if (eliminations.isEmpty()) continue
-                return TechniqueSearchResult.Found(
-                    LogicalStep(
-                        technique,
-                        eliminations = eliminations
-                    )
-                )
+                return TechniqueSearchResult.Found(LogicalStep(technique, eliminations = eliminations))
             }
         }
         return TechniqueSearchResult.NotFound
@@ -43,8 +36,8 @@ class HiddenPairDetector : TechniqueDetector {
         candidateCells: List<Int>,
         state: LogicalState,
     ): Int {
-        for (otherDigit in (digit + 1)..9) {
-            val otherCells = unit.filter { cell ->
+        for (otherDigit: Int in (digit + 1)..9) {
+            val otherCells: List<Int> = unit.filter { cell: Int ->
                 otherDigit in state.candidates[cell]
             }
             if (otherCells == candidateCells) return otherDigit
@@ -57,10 +50,10 @@ class HiddenPairDetector : TechniqueDetector {
         pairDigits: Set<Int>,
         state: LogicalState,
     ): Map<Int, Set<Int>> {
-        val removableDigitsByCell = pairCells.associateWith { cell ->
+        val removableDigitsByCell: Map<Int, Set<Int>> = pairCells.associateWith { cell: Int ->
             state.candidates[cell] - pairDigits
         }
-        val eliminations = removableDigitsByCell.filterValues { digits ->
+        val eliminations: Map<Int, Set<Int>> = removableDigitsByCell.filterValues { digits: Set<Int> ->
             digits.isNotEmpty()
         }
         return eliminations

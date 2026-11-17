@@ -1,20 +1,22 @@
 package sudoku.data.game
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.core.content.edit
+import sudoku.domain.common.OptionalValue
 import sudoku.domain.game.GameRepository
 import sudoku.domain.game.GameSession
 import sudoku.domain.puzzle.GeneratorVersion
 import sudoku.domain.puzzle.PuzzleId
 
 class SharedPreferencesGameRepository(context: Context) : GameRepository {
-    private val preferences = context.getSharedPreferences("games", Context.MODE_PRIVATE)
+    private val preferences: SharedPreferences = context.getSharedPreferences("games", Context.MODE_PRIVATE)
 
-    override fun load(puzzle: PuzzleId): GameSession? {
-        val encoded = preferences.getString(puzzle.key, null)
-        val session = if (encoded != null) GameStateCodec.decode(encoded) else migrateLegacy(puzzle)
-        if (session?.isGameOver == true) delete(puzzle)
-        return session?.takeUnless { it.isGameOver }
+    override fun load(puzzle: PuzzleId): OptionalValue<GameSession> {
+        val encoded: OptionalValue<String> = OptionalValue.fromNullable(preferences.getString(puzzle.key, null))
+        val session: OptionalValue<GameSession> = encoded.fold({ migrateLegacy(puzzle) }, GameStateCodec::decode)
+        if (session.matches { game: GameSession -> game.isGameOver }) delete(puzzle)
+        return session.filter { game: GameSession -> !game.isGameOver }
     }
 
     override fun save(puzzle: PuzzleId, session: GameSession) {
@@ -32,11 +34,11 @@ class SharedPreferencesGameRepository(context: Context) : GameRepository {
         }
     }
 
-    private fun migrateLegacy(puzzle: PuzzleId): GameSession? {
-        if (!puzzle.isLegacySlot()) return null
-        val encoded = preferences.getString(puzzle.difficulty.name, null) ?: return null
-        val session = GameStateCodec.decode(encoded) ?: return null
-        save(puzzle, session)
+    private fun migrateLegacy(puzzle: PuzzleId): OptionalValue<GameSession> {
+        if (!puzzle.isLegacySlot()) return OptionalValue.Absent
+        val encoded: String = preferences.getString(puzzle.difficulty.name, null) ?: return OptionalValue.Absent
+        val session: OptionalValue<GameSession> = GameStateCodec.decode(encoded)
+        session.ifPresent { game: GameSession -> save(puzzle, game) }
         return session
     }
 

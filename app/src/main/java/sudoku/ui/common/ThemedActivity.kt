@@ -6,6 +6,7 @@ import android.view.View
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import sudoku.app.appContainer
@@ -26,8 +27,8 @@ abstract class ThemedActivity : AppCompatActivity() {
     }
 
     protected fun applySystemInsets(root: View) {
-        ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
-            val bars =
+        ViewCompat.setOnApplyWindowInsetsListener(root) { view: View, insets: WindowInsetsCompat ->
+            val bars: Insets =
                 insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
             view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
             insets
@@ -48,7 +49,7 @@ abstract class ThemedActivity : AppCompatActivity() {
     }
 
     private fun configureSystemBars() {
-        val style = if (preferences.theme.lightSystemBars) {
+        val style: SystemBarStyle = if (preferences.theme.lightSystemBars) {
             SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
         } else {
             SystemBarStyle.dark(Color.TRANSPARENT)

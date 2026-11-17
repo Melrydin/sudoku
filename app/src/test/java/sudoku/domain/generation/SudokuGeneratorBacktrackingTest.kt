@@ -9,14 +9,14 @@ import sudoku.domain.board.SudokuRules
 import sudoku.fixtures.TestBoards
 
 class SudokuGeneratorBacktrackingTest {
-    private val puzzle = SudokuBoard.parse(
+    private val puzzle: SudokuBoard = SudokuBoard.parse(
         "534608012602100040098342560059060023426053001010924856901037084280000005045080179",
     )
 
     @Test(timeout = 5000)
     fun recoversFromDeadEndsWithoutChangingStartingNumbers() {
-        val generator = generatorFor(puzzle)
-        val result = generator.generate()
+        val generator: SudokuGenerator = generatorFor(puzzle)
+        val result: SudokuBoard = generator.generate()
         assertTrue(SudokuRules.isComplete(result))
         assertTrue(generator.freeCells.isEmpty())
         assertTrue(puzzle.cells.indices.all { puzzle[it] == 0 || puzzle[it] == result[it] })
@@ -29,12 +29,13 @@ class SudokuGeneratorBacktrackingTest {
 
     @Test(timeout = 5000)
     fun exhaustedSearchRestoresTheStartingBoardAndFreeCells() {
-        val blockedCells = setOf(7, 18) + (72..80)
-        val blocked = blockedCells.fold(TestBoards.solved().withValue(0, 1)) { board, cell ->
+        val blockedCells: Set<Int> = setOf(7, 18) + (72..80)
+        val blocked: SudokuBoard =
+            blockedCells.fold(TestBoards.solved().withValue(0, 1)) { board: SudokuBoard, cell: Int ->
             board.withValue(cell, 0)
         }
         assertTrue(SudokuRules.conflicts(blocked).isEmpty())
-        val generator = generatorFor(blocked)
+        val generator: SudokuGenerator = generatorFor(blocked)
         assertThrows(IllegalStateException::class.java) { generator.generate() }
         assertEquals(blocked.cells, generator.board.cells)
         assertEquals(blockedCells, generator.freeCells.toSet())
@@ -43,7 +44,7 @@ class SudokuGeneratorBacktrackingTest {
 
     @Test
     fun rejectsAFilledBoardWithConflicts() {
-        val generator = generatorFor(TestBoards.solved().withValue(0, 1))
+        val generator: SudokuGenerator = generatorFor(TestBoards.solved().withValue(0, 1))
         assertThrows(IllegalStateException::class.java) { generator.generate() }
     }
 

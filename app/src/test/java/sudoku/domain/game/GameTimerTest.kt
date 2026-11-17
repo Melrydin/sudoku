@@ -6,7 +6,7 @@ import sudoku.data.puzzle.SamplePuzzle
 
 class GameTimerTest {
     private var now: Long = 0
-    private val timer = GameTimer(now = { now })
+    private val timer: GameTimer = GameTimer(now = { now })
 
     @Test
     fun countsActiveTimeAndExcludesPausedTime() {
@@ -41,7 +41,7 @@ class GameTimerTest {
 
     @Test
     fun restoredTimerStartsPausedAndContinuesFromSavedTime() {
-        val restored = GameTimer(60_000) { now }
+        val restored: GameTimer = GameTimer(60_000) { now }
         now = 10_000
         assertEquals(60_000L, restored.elapsedMillis)
         restored.resume()
@@ -51,7 +51,7 @@ class GameTimerTest {
 
     @Test
     fun undoKeepsElapsedTime() {
-        val session = GameSession(SamplePuzzle.create())
+        val session: GameSession = GameSession(SamplePuzzle.create())
         session.select(2)
         session.enter(4)
         session.trackElapsedTime(25_000)

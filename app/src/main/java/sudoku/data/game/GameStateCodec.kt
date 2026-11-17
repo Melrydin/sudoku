@@ -1,8 +1,10 @@
 package sudoku.data.game
 
+import java.util.UUID
 import org.json.JSONArray
 import org.json.JSONObject
 import sudoku.domain.board.SudokuBoard
+import sudoku.domain.common.OptionalValue
 import sudoku.domain.game.GameAssist
 import sudoku.domain.game.GameSession
 import sudoku.domain.game.GameState
@@ -20,23 +22,23 @@ object GameStateCodec {
         .put("history", JSONArray().apply { session.undoHistory.forEach { put(encodeState(it)) } })
         .toString()
 
-    fun decode(value: String): GameSession? = runCatching {
-        val json = JSONObject(value)
+    fun decode(value: String): OptionalValue<GameSession> = runCatching {
+        val json: JSONObject = JSONObject(value)
         require(json.getInt("version") == 1)
-        val state = decodeState(json.getJSONObject("state"))
-        val history = json.getJSONArray("history")
+        val state: GameState = decodeState(json.getJSONObject("state"))
+        val history: JSONArray = json.getJSONArray("history")
         require(history.length() <= GameSession.MAX_HISTORY)
-        val snapshots = (0 until history.length()).map { decodeState(history.getJSONObject(it)) }
+        val snapshots: List<GameState> = (0 until history.length()).map { decodeState(history.getJSONObject(it)) }
         require(snapshots.all { it.puzzle.cells == state.puzzle.cells })
         restoreSession(json, state, snapshots)
-    }.getOrNull()
+    }.fold({ session: GameSession -> OptionalValue.Present(session) }, { OptionalValue.Absent })
 
     private fun restoreSession(
         json: JSONObject,
         state: GameState,
         history: List<GameState>
     ): GameSession {
-        val assistance = decodeAssistance(json)
+        val assistance: Set<GameAssist> = decodeAssistance(json)
         return GameSession(
             initialState = state,
             history = history,
@@ -44,8 +46,7 @@ object GameStateCodec {
             initialSolution = decodeSolution(json),
             initialMistakes = decodeMistakes(json),
             initialAssistance = assistance,
-            id = if (json.has("id")) json.getString("id") else java.util.UUID.randomUUID()
-                .toString(),
+            id = if (json.has("id")) json.getString("id") else UUID.randomUUID().toString(),
             initialPrefillNotesEnabled = json.optBoolean(
                 "prefillNotesEnabled",
                 GameAssist.PREFILL_NOTES in assistance
@@ -54,14 +55,15 @@ object GameStateCodec {
     }
 
     private fun decodeAssistance(json: JSONObject): Set<GameAssist> {
-        val values =
+        val values: JSONArray =
             if (json.has("assistance")) json.getJSONArray("assistance") else return emptySet()
         require(values.length() <= GameAssist.entries.size)
         return (0 until values.length()).map { GameAssist.valueOf(values.getString(it)) }.toSet()
     }
 
-    private fun decodeSolution(json: JSONObject): SudokuBoard? =
-        if (json.has("solution")) SudokuBoard.parse(json.getString("solution")) else null
+    private fun decodeSolution(json: JSONObject): OptionalValue<SudokuBoard> =
+        if (json.has("solution")) OptionalValue.Present(SudokuBoard.parse(json.getString("solution")))
+        else OptionalValue.Absent
 
     private fun decodeMistakes(json: JSONObject): Int =
         if (json.has("mistakes")) json.getInt("mistakes") else 0
@@ -76,12 +78,12 @@ object GameStateCodec {
             JSONArray().apply { state.notes.forEach { put(it.sorted().joinToString("")) } })
 
     private fun decodeState(json: JSONObject): GameState {
-        val notes = json.getJSONArray("notes")
+        val notes: JSONArray = json.getJSONArray("notes")
         require(notes.length() == SudokuBoard.CELL_COUNT)
         return GameState(
             puzzle = SudokuBoard.parse(json.getString("puzzle")),
             board = SudokuBoard.parse(json.getString("board")),
-            notes = (0 until notes.length()).map { index -> parseNotes(notes.getString(index)) },
+            notes = (0 until notes.length()).map { index: Int -> parseNotes(notes.getString(index)) },
             selectedCell = json.getInt("selected"),
             noteMode = json.getBoolean("noteMode"),
         )

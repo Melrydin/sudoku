@@ -11,12 +11,12 @@ class LockedCandidatesClaimingDetector : TechniqueDetector {
     override val technique: SolvingTechnique = SolvingTechnique.LOCKED_CANDIDATES_CLAIMING
 
     override fun findStep(state: LogicalState): TechniqueSearchResult {
-        val lines = SudokuUnits.rows + SudokuUnits.columns
-        for (line in lines) {
-            for (digit in 1..9) {
-                val candidateCells = line.filter { cell -> digit in state.candidates[cell] }
+        val lines: List<List<Int>> = SudokuUnits.rows + SudokuUnits.columns
+        for (line: List<Int> in lines) {
+            for (digit: Int in 1..9) {
+                val candidateCells: List<Int> = line.filter { cell: Int -> digit in state.candidates[cell] }
                 if (candidateCells.size < 2) continue
-                val eliminationCells = findEliminationCells(digit, line, candidateCells, state)
+                val eliminationCells: List<Int> = findEliminationCells(digit, line, candidateCells, state)
 
                 if (eliminationCells.isEmpty()) continue
                 return TechniqueSearchResult.Found(
@@ -36,10 +36,10 @@ class LockedCandidatesClaimingDetector : TechniqueDetector {
         candidateCells: List<Int>,
         state: LogicalState,
     ): List<Int> {
-        val box = SudokuUnits.boxes.singleOrNull { box ->
-            candidateCells.all { cell -> cell in box }
-        }
-        return box?.filter { cell -> cell !in line }
-            ?.filter { cell -> digit in state.candidates[cell] }.orEmpty()
+        val box: List<Int> = SudokuUnits.boxes.singleOrNull { box: List<Int> ->
+            candidateCells.all { cell: Int -> cell in box }
+        }.orEmpty()
+        return box.filter { cell: Int -> cell !in line }
+            .filter { cell: Int -> digit in state.candidates[cell] }.orEmpty()
     }
 }

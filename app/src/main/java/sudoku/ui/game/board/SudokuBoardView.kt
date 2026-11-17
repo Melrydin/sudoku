@@ -19,9 +19,9 @@ class SudokuBoardView @JvmOverloads constructor(context: Context, attrs: Attribu
     GridLayout(context, attrs) {
     var onCellSelected: (Int) -> Unit = {}
     var onCellErased: (Int) -> Unit = {}
-    private val colors = ThemeColors(context)
-    private val gridPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val cells = List(SudokuBoard.CELL_COUNT) { createCell(it) }
+    private val colors: ThemeColors = ThemeColors(context)
+    private val gridPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val cells: List<SudokuCellView> = List(SudokuBoard.CELL_COUNT) { createCell(it) }
 
     init {
         columnCount = SudokuBoard.SIZE
@@ -35,13 +35,13 @@ class SudokuBoardView @JvmOverloads constructor(context: Context, attrs: Attribu
         options: GameOptions = GameOptions(),
         incorrectCells: Set<Int>? = null
     ) {
-        val conflicts = incorrectCells ?: SudokuRules.conflicts(state.board)
+        val conflicts: Set<Int> = incorrectCells ?: SudokuRules.conflicts(state.board)
         cells.forEach { it.render(state, conflicts, options) }
     }
 
     override fun dispatchDraw(canvas: Canvas) {
         super.dispatchDraw(canvas)
-        for (line in 1 until SudokuBoard.SIZE) drawGridLine(canvas, line)
+        for (line: Int in 1 until SudokuBoard.SIZE) drawGridLine(canvas, line)
     }
 
     private fun createCell(index: Int): SudokuCellView = SudokuCellView(context, index).apply {
@@ -75,7 +75,7 @@ class SudokuBoardView @JvmOverloads constructor(context: Context, attrs: Attribu
         }
 
     private fun drawGridLine(canvas: Canvas, line: Int) {
-        val major = line % SudokuBoard.BOX_SIZE == 0
+        val major: Boolean = line % SudokuBoard.BOX_SIZE == 0
         gridPaint.color =
             if (major) colors.accent else ColorUtils.setAlphaComponent(colors.outline, 110)
         gridPaint.strokeWidth = resources.displayMetrics.density * if (major) 1.4f else 0.5f
@@ -86,9 +86,9 @@ class SudokuBoardView @JvmOverloads constructor(context: Context, attrs: Attribu
     }
 
     private fun drawMinorLines(canvas: Canvas, line: Int) {
-        val cellWidth = width / 9f
-        val cellHeight = height / 9f
-        for (cell in 0 until SudokuBoard.SIZE) {
+        val cellWidth: Float = width / 9f
+        val cellHeight: Float = height / 9f
+        for (cell: Int in 0 until SudokuBoard.SIZE) {
             canvas.drawLine(
                 line * cellWidth, (cell + 0.2f) * cellHeight,
                 line * cellWidth, (cell + 0.8f) * cellHeight, gridPaint

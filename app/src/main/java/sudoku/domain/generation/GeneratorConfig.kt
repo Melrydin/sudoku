@@ -1,9 +1,9 @@
 package sudoku.domain.generation
 
+import kotlin.random.Random
 import sudoku.domain.puzzle.Difficulty
 import sudoku.domain.puzzle.GeneratorVersion
 import sudoku.domain.puzzle.PuzzleId
-import kotlin.random.Random
 
 object GeneratorConfig {
     const val APP_SEED: Int = 123456789

@@ -10,12 +10,12 @@ class NakedSingleDetector : TechniqueDetector {
     override val technique: SolvingTechnique = SolvingTechnique.NAKED_SINGLE
 
     override fun findStep(state: LogicalState): TechniqueSearchResult {
-        val board = state.board.cells.indices
+        val board: IntRange = state.board.cells.indices
 
-        board.forEach { cell ->
-            val candidates = state.candidates[cell]
+        board.forEach { cell: Int ->
+            val candidates: Set<Int> = state.candidates[cell]
             if (candidates.size == 1) {
-                val candidate = candidates.single()
+                val candidate: Int = candidates.single()
                 return TechniqueSearchResult.Found(
                     LogicalStep(
                         technique,

@@ -19,7 +19,7 @@ private class WaitForGame : ViewAction {
     override fun getConstraints(): Matcher<View> = isRoot()
 
     override fun perform(uiController: UiController, view: View) {
-        val deadline = SystemClock.uptimeMillis() + 10_000
+        val deadline: Long = SystemClock.uptimeMillis() + 10_000
         while (view.rootView.findViewById<View>(R.id.sudoku_board) == null) {
             check(SystemClock.uptimeMillis() < deadline) { "The generated board did not appear." }
             uiController.loopMainThreadForAtLeast(50)

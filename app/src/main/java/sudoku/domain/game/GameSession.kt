@@ -1,31 +1,36 @@
 package sudoku.domain.game
 
+import java.util.UUID
 import sudoku.domain.board.SudokuBoard
 import sudoku.domain.board.SudokuRules
+import sudoku.domain.common.OptionalValue
 import sudoku.domain.settings.GameOptions
 import sudoku.domain.solver.SolutionResolver
-import java.util.UUID
 
 class GameSession(
     initialState: GameState,
     history: List<GameState> = emptyList(),
     initialElapsedMillis: Long = 0,
-    initialSolution: SudokuBoard? = null,
+    initialSolution: OptionalValue<SudokuBoard> = OptionalValue.Absent,
     initialMistakes: Int = 0,
     initialAssistance: Set<GameAssist> = emptySet(),
     val id: String = UUID.randomUUID().toString(),
     initialPrefillNotesEnabled: Boolean = GameAssist.PREFILL_NOTES in initialAssistance,
 ) {
-    private val assistance = initialAssistance.toMutableSet()
+    private val assistance: MutableSet<GameAssist> = initialAssistance.toMutableSet()
     val usedAssistance: Set<GameAssist> get() = assistance.toSet()
     val assistancePoints: Int get() = assistance.size
     var prefillNotesEnabled: Boolean = initialPrefillNotesEnabled
         private set
     val solution: SudokuBoard =
-        initialSolution ?: requireNotNull(SolutionResolver().resolve(initialState.puzzle))
+        initialSolution.getOrElse {
+            SolutionResolver().resolve(initialState.puzzle).getOrElse {
+                throw IllegalArgumentException("Required value was null.")
+            }
+        }
     var state: GameState = initialState
         private set
-    private val history = ArrayDeque(history)
+    private val history: ArrayDeque<GameState> = ArrayDeque(history)
     var mistakes: Int = initialMistakes
         private set
     val remainingLives: Int get() = MAX_MISTAKES - mistakes
@@ -126,8 +131,8 @@ class GameSession(
 
     private fun enterNote(value: Int) {
         if (state.board[state.selectedCell] != 0) return
-        val current = state.notes[state.selectedCell]
-        val next = if (value in current) current - value else current + value
+        val current: Set<Int> = state.notes[state.selectedCell]
+        val next: Set<Int> = if (value in current) current - value else current + value
         commit(state.copy(notes = updatedNotes(next)))
     }
 

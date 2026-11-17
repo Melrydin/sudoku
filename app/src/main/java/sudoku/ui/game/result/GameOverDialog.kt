@@ -1,11 +1,12 @@
 package sudoku.ui.game.result
 
 import android.content.Context
+import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import sudoku.R
 
 class GameOverDialog(context: Context, onHome: () -> Unit) {
-    private val dialog = MaterialAlertDialogBuilder(context)
+    private val dialog: AlertDialog = MaterialAlertDialogBuilder(context)
         .setTitle(R.string.game_over)
         .setMessage(R.string.game_over_message)
         .setCancelable(false)
@@ -16,5 +17,5 @@ class GameOverDialog(context: Context, onHome: () -> Unit) {
         if (!dialog.isShowing) dialog.show()
     }
 
-    fun dismiss() = dialog.dismiss()
+    fun dismiss(): Unit = dialog.dismiss()
 }

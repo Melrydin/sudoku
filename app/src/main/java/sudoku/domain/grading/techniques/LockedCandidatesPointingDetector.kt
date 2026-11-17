@@ -12,23 +12,20 @@ class LockedCandidatesPointingDetector : TechniqueDetector {
     override val technique: SolvingTechnique = SolvingTechnique.LOCKED_CANDIDATES_POINTING
 
     override fun findStep(state: LogicalState): TechniqueSearchResult {
-        val boxes = SudokuUnits.boxes
-        boxes.forEach { box ->
-            for (digit in 1..9) {
-                val matchingCells = box.filter { cell ->
+        val boxes: List<List<Int>> = SudokuUnits.boxes
+        boxes.forEach { box: List<Int> ->
+            for (digit: Int in 1..9) {
+                val matchingCells: List<Int> = box.filter { cell: Int ->
                     digit in state.candidates[cell]
                 }
-                val row =
-                    matchingCells.map { cell -> cell / SudokuBoard.SIZE }.distinct().singleOrNull()
-                val column =
-                    matchingCells.map { cell -> cell % SudokuBoard.SIZE }.distinct().singleOrNull()
-                val eliminationCells = findEliminationCells(state, box, row, column, digit)
+                val row: Int =
+                    matchingCells.map { cell: Int -> cell / SudokuBoard.SIZE }.distinct().singleOrNull() ?: -1
+                val column: Int =
+                    matchingCells.map { cell: Int -> cell % SudokuBoard.SIZE }.distinct().singleOrNull() ?: -1
+                val eliminationCells: Set<Int> = findEliminationCells(state, box, row, column, digit)
                 if (eliminationCells.isNotEmpty()) {
-                    return TechniqueSearchResult.Found(
-                        LogicalStep(
-                            technique,
-                            eliminations = eliminationCells.associateWith { setOf(digit) })
-                    )
+                    val eliminations: Map<Int, Set<Int>> = eliminationCells.associateWith { setOf(digit) }
+                    return TechniqueSearchResult.Found(LogicalStep(technique, eliminations = eliminations))
                 }
             }
         }
@@ -38,15 +35,15 @@ class LockedCandidatesPointingDetector : TechniqueDetector {
     private fun findEliminationCells(
         state: LogicalState,
         box: List<Int>,
-        row: Int?,
-        column: Int?,
+        row: Int,
+        column: Int,
         digit: Int,
     ): Set<Int> {
-        val line = when {
-            column != null -> SudokuUnits.columns[column]
-            row != null -> SudokuUnits.rows[row]
+        val line: List<Int> = when {
+            column >= 0 -> SudokuUnits.columns[column]
+            row >= 0 -> SudokuUnits.rows[row]
             else -> return emptySet()
         }
-        return line.filter { cell -> cell !in box && digit in state.candidates[cell] }.toSet()
+        return line.filter { cell: Int -> cell !in box && digit in state.candidates[cell] }.toSet()
     }
 }

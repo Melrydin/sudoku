@@ -12,6 +12,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import sudoku.R
 import sudoku.app.appContainer
+import sudoku.data.preferences.GamePreferences
+import sudoku.domain.common.OptionalValue
+import sudoku.domain.game.GameRepository
 import sudoku.domain.game.GameSession
 import sudoku.domain.game.GameTimer
 import sudoku.domain.game.NewGameFactory
@@ -29,15 +32,15 @@ import sudoku.ui.settings.SettingsActivity
 import sudoku.ui.theme.ThemePalette
 
 class GameActivity : ThemedActivity() {
-    private val store by lazy { appContainer.games }
-    private val gamePreferences by lazy { appContainer.gamePreferences }
-    private val puzzle by lazy { puzzleFromIntent() }
-    private val preparation by lazy { ViewModelProvider(this)[GamePreparationModel::class.java] }
-    private var startFresh = false
-    private var gameReady = false
-    private var gameOverPending = false
-    private var victoryOpened = false
-    private var gameOverDialog: GameOverDialog? = null
+    private val store: GameRepository by lazy { appContainer.games }
+    private val gamePreferences: GamePreferences by lazy { appContainer.gamePreferences }
+    private val puzzle: PuzzleId by lazy { puzzleFromIntent() }
+    private val preparation: GamePreparationModel by lazy { ViewModelProvider(this)[GamePreparationModel::class.java] }
+    private var startFresh: Boolean = false
+    private var gameReady: Boolean = false
+    private var gameOverPending: Boolean = false
+    private var victoryOpened: Boolean = false
+    private val gameOverDialog: Lazy<GameOverDialog> = lazy { GameOverDialog(this, ::returnHome) }
     private lateinit var session: GameSession
     private lateinit var screen: GameScreen
     private lateinit var timer: GameTimer
@@ -89,14 +92,14 @@ class GameActivity : ThemedActivity() {
     }
 
     override fun onDestroy() {
-        gameOverDialog?.dismiss()
+        if (gameOverDialog.isInitialized()) gameOverDialog.value.dismiss()
         super.onDestroy()
     }
 
     private fun prepareSession(savedInstanceState: Bundle?) {
         startFresh = savedInstanceState?.getBoolean(EXTRA_NEW_GAME)
             ?: intent.getBooleanExtra(EXTRA_NEW_GAME, false)
-        val saved = if (startFresh) null else store.load(puzzle)
+        val saved: OptionalValue<GameSession> = if (startFresh) OptionalValue.Absent else store.load(puzzle)
         preparation.prepare(saved, puzzle, gamePreferences.options.prefillNotes)
     }
 
@@ -137,7 +140,7 @@ class GameActivity : ThemedActivity() {
     }
 
     private fun bindGameViews() {
-        val root = findViewById<View>(R.id.game_root)
+        val root: View = findViewById<View>(R.id.game_root)
         applySystemInsets(root)
         timerDisplay = GameTimerDisplay(findViewById(R.id.game_timer), timer) {
             session.state.isComplete || session.isGameOver
@@ -167,9 +170,7 @@ class GameActivity : ThemedActivity() {
         if (::timerDisplay.isInitialized) timerDisplay.stop()
         store.delete(puzzle)
         if (!gameReady) showGameOverBackground()
-        val dialog =
-            gameOverDialog ?: GameOverDialog(this, ::returnHome).also { gameOverDialog = it }
-        dialog.show()
+        gameOverDialog.value.show()
     }
 
     private fun showGameOverBackground() {
@@ -189,7 +190,7 @@ class GameActivity : ThemedActivity() {
         victoryOpened = true
         timerDisplay.stop()
         saveSession()
-        val result = GameResult(
+        val result: GameResult = GameResult(
             session.id, puzzle, session.elapsedMillis,
             session.assistancePoints, System.currentTimeMillis()
         )
@@ -219,28 +220,28 @@ class GameActivity : ThemedActivity() {
 
     private fun restart() {
         timerDisplay.stop()
-        val next = NewGameFactory.fromPuzzle(
-            session.state.puzzle, gamePreferences.options.prefillNotes, session.solution,
+        val next: GameSession = NewGameFactory.fromPuzzle(
+            session.state.puzzle, gamePreferences.options.prefillNotes, OptionalValue.Present(session.solution),
         )
         preparation.setSession(next)
     }
 
     private fun puzzleFromIntent(): PuzzleId {
-        val difficulty =
+        val difficulty: Difficulty =
             Difficulty.entries.find { it.name == intent.getStringExtra(EXTRA_DIFFICULTY) }
                 ?: Difficulty.EASY
-        val versionNumber = intent.getIntExtra(EXTRA_VERSION, GeneratorConfig.VERSION.number)
-        val version = GeneratorVersion.entries.find { it.number == versionNumber }
+        val versionNumber: Int = intent.getIntExtra(EXTRA_VERSION, GeneratorConfig.VERSION.number)
+        val version: GeneratorVersion = GeneratorVersion.entries.find { it.number == versionNumber }
             ?: GeneratorConfig.VERSION
         return PuzzleId(difficulty, intent.getIntExtra(EXTRA_LEVEL, 1).coerceAtLeast(1), version)
     }
 
     companion object {
-        private const val EXTRA_DIFFICULTY = "difficulty"
-        private const val EXTRA_LEVEL = "level"
-        private const val EXTRA_VERSION = "generator_version"
-        private const val EXTRA_NEW_GAME = "new_game"
-        private const val EXTRA_GAME_OVER = "game_over"
+        private const val EXTRA_DIFFICULTY: String = "difficulty"
+        private const val EXTRA_LEVEL: String = "level"
+        private const val EXTRA_VERSION: String = "generator_version"
+        private const val EXTRA_NEW_GAME: String = "new_game"
+        private const val EXTRA_GAME_OVER: String = "game_over"
 
         fun intent(context: Context, puzzle: PuzzleId, newGame: Boolean): Intent =
             Intent(context, GameActivity::class.java)

@@ -5,11 +5,12 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import sudoku.data.puzzle.SamplePuzzle
+import sudoku.domain.board.SudokuBoard
 import sudoku.domain.board.SudokuRules
 import sudoku.fixtures.TestBoards
 
 class GameSessionTest {
-    private val session = GameSession(SamplePuzzle.create())
+    private val session: GameSession = GameSession(SamplePuzzle.create())
 
     @Test
     fun startingNumbersCannotBeChangedOrErased() {
@@ -84,7 +85,7 @@ class GameSessionTest {
 
     @Test
     fun completedGamesIgnoreEditsButSupportUndo() {
-        val game = GameSession(GameState(TestBoards.solved().withValue(80, 0)))
+        val game: GameSession = GameSession(GameState(TestBoards.solved().withValue(80, 0)))
         game.select(80)
         game.enter(9)
         assertTrue(game.state.isComplete)
@@ -100,14 +101,14 @@ class GameSessionTest {
     fun historySurvivesAReconstructedSession() {
         session.select(2)
         session.enter(4)
-        val restored = GameSession(session.state, session.undoHistory)
+        val restored: GameSession = GameSession(session.state, session.undoHistory)
         restored.undo()
         assertEquals(0, restored.state.board[2])
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun rejectsRestoringChangedStartingNumbers() {
-        val puzzle = SamplePuzzle.create().puzzle
+        val puzzle: SudokuBoard = SamplePuzzle.create().puzzle
         GameState(puzzle, puzzle.withValue(0, 9))
     }
 }

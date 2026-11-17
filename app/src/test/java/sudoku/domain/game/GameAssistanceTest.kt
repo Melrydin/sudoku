@@ -7,8 +7,8 @@ import sudoku.domain.settings.GameOptions
 import sudoku.fixtures.TestBoards
 
 class GameAssistanceTest {
-    private val session = GameSession(SamplePuzzle.create())
-    private val disabled = GameOptions(false, false, false, false, false)
+    private val session: GameSession = GameSession(SamplePuzzle.create())
+    private val disabled: GameOptions = GameOptions(false, false, false, false, false)
 
     @Test
     fun everyActivatedAssistCountsOnceUpToFivePoints() {
@@ -39,7 +39,7 @@ class GameAssistanceTest {
 
     @Test
     fun completionFreezesTheAssistanceScore() {
-        val game = GameSession(GameState(TestBoards.solved().withValue(80, 0)))
+        val game: GameSession = GameSession(GameState(TestBoards.solved().withValue(80, 0)))
         game.recordAssistance(disabled.copy(showRemainingCount = true))
         game.select(80)
         game.enter(9)

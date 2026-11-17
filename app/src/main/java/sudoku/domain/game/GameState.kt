@@ -12,7 +12,7 @@ data class GameState(
 ) {
     init {
         require(selectedCell in -1 until SudokuBoard.CELL_COUNT)
-        require(notes.size == SudokuBoard.CELL_COUNT && notes.all { cell -> cell.all { it in 1..9 } })
+        require(notes.size == SudokuBoard.CELL_COUNT && notes.all { cell: Set<Int> -> cell.all { it in 1..9 } })
         require(puzzle.cells.indices.all { puzzle[it] == 0 || puzzle[it] == board[it] })
         require(notes.indices.all { board[it] == 0 || notes[it].isEmpty() })
         require(SudokuRules.conflicts(puzzle).isEmpty())

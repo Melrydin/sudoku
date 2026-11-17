@@ -12,9 +12,9 @@ class GameTimerDisplay(
     private val timer: GameTimer,
     private val hasEnded: () -> Boolean,
 ) {
-    private val handler = Handler(Looper.getMainLooper())
-    private var active = false
-    private val tick = object : Runnable {
+    private val handler: Handler = Handler(Looper.getMainLooper())
+    private var active: Boolean = false
+    private val tick: Runnable = object : Runnable {
         override fun run() {
             refresh()
             if (active) handler.postDelayed(this, 1_000)
@@ -35,7 +35,7 @@ class GameTimerDisplay(
 
     fun refresh() {
         if (active && !hasEnded()) timer.resume() else timer.pause()
-        val time =
+        val time: String =
             PlayTimeFormatter.format(timer.elapsedMillis, view.resources.configuration.locales[0])
         view.text = time
         view.contentDescription = view.context.getString(R.string.play_time_description, time)

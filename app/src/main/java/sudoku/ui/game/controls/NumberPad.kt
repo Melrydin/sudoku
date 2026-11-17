@@ -18,8 +18,8 @@ import sudoku.ui.common.formatNumber
 import sudoku.ui.theme.ThemeColors
 
 class NumberPad(private val root: GridLayout, private val onNumber: (Int) -> Unit) {
-    private val colors = ThemeColors(root.context)
-    private val numbers = (1..SudokuBoard.SIZE).map { numberButton(it) }
+    private val colors: ThemeColors = ThemeColors(root.context)
+    private val numbers: List<MaterialButton> = (1..SudokuBoard.SIZE).map { numberButton(it) }
 
     fun bind(onErase: () -> Unit) {
         numbers.forEach(root::addView)
@@ -27,9 +27,9 @@ class NumberPad(private val root: GridLayout, private val onNumber: (Int) -> Uni
     }
 
     fun render(board: SudokuBoard, options: GameOptions) {
-        numbers.forEachIndexed { index, button ->
-            val remaining = DigitCounts.remaining(board, index + 1)
-            val digit = root.context.formatNumber(index + 1)
+        numbers.forEachIndexed { index: Int, button: MaterialButton ->
+            val remaining: Int = DigitCounts.remaining(board, index + 1)
+            val digit: String = root.context.formatNumber(index + 1)
             button.isInvisible = options.hideCompletedDigits && remaining == 0
             button.text = if (options.showRemainingCount) countedLabel(digit, remaining) else digit
             button.contentDescription =
@@ -44,8 +44,8 @@ class NumberPad(private val root: GridLayout, private val onNumber: (Int) -> Uni
     }
 
     private fun countedLabel(digit: String, remaining: Int): SpannableString {
-        val label = SpannableString("$digit\n${root.context.formatNumber(remaining)}")
-        val flags = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        val label: SpannableString = SpannableString("$digit\n${root.context.formatNumber(remaining)}")
+        val flags: Int = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         label.setSpan(RelativeSizeSpan(0.44f), digit.length + 1, label.length, flags)
         label.setSpan(ForegroundColorSpan(colors.muted), digit.length + 1, label.length, flags)
         return label
@@ -96,8 +96,8 @@ class NumberPad(private val root: GridLayout, private val onNumber: (Int) -> Uni
     }
 
     private fun buttonLayout(): GridLayout.LayoutParams = GridLayout.LayoutParams().apply {
-        val density = root.resources.displayMetrics.density
-        val margin = (4 * density).toInt()
+        val density: Float = root.resources.displayMetrics.density
+        val margin: Int = (4 * density).toInt()
         width = 0
         height = (64 * density).toInt()
         rowSpec = GridLayout.spec(GridLayout.UNDEFINED, GridLayout.CENTER)

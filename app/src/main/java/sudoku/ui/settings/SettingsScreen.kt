@@ -21,10 +21,10 @@ class SettingsScreen(private val root: View, private val preferences: GamePrefer
     fun render(section: SettingsSection) {
         root.findViewById<TextView>(R.id.settings_title).setText(section.title)
         root.findViewById<View>(R.id.settings_menu).isVisible = section == SettingsSection.MENU
-        val options = root.findViewById<LinearLayout>(R.id.settings_options)
+        val options: LinearLayout = root.findViewById<LinearLayout>(R.id.settings_options)
         options.removeAllViews()
-        GameSetting.entries.filter { it.section == section }.forEach { setting ->
-            val row =
+        GameSetting.entries.filter { it.section == section }.forEach { setting: GameSetting ->
+            val row: View =
                 LayoutInflater.from(root.context).inflate(R.layout.setting_toggle, options, false)
             bindToggle(row, setting)
             options.addView(row)
@@ -38,10 +38,10 @@ class SettingsScreen(private val root: View, private val preferences: GamePrefer
             isVisible = setting.summary != 0
             if (setting.summary != 0) setText(setting.summary)
         }
-        val toggle = row.findViewById<MaterialButton>(R.id.setting_toggle)
+        val toggle: MaterialButton = row.findViewById<MaterialButton>(R.id.setting_toggle)
         toggle.isChecked = setting.read(preferences.options)
         updateLabel(toggle, setting)
-        toggle.addOnCheckedChangeListener { _, checked ->
+        toggle.addOnCheckedChangeListener { _, checked: Boolean ->
             preferences.options = setting.update(preferences.options, checked)
             updateLabel(toggle, setting)
         }

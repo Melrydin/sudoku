@@ -18,10 +18,10 @@ class GameScreen(
     private val onChanged: () -> Unit,
     private val options: () -> GameOptions = { GameOptions() },
 ) {
-    private val board = root.findViewById<SudokuBoardView>(R.id.sudoku_board)
-    private val notes = root.findViewById<MaterialButton>(R.id.notes)
-    private val undo = root.findViewById<MaterialButton>(R.id.undo)
-    private val numberPad = NumberPad(root.findViewById(R.id.number_pad)) { number ->
+    private val board: SudokuBoardView = root.findViewById<SudokuBoardView>(R.id.sudoku_board)
+    private val notes: MaterialButton = root.findViewById<MaterialButton>(R.id.notes)
+    private val undo: MaterialButton = root.findViewById<MaterialButton>(R.id.undo)
+    private val numberPad: NumberPad = NumberPad(root.findViewById(R.id.number_pad)) { number: Int ->
         edit { enter(number, options().autoRemoveNotes) }
     }
 
@@ -36,14 +36,14 @@ class GameScreen(
         root.findViewById<View>(R.id.game_settings).setOnClickListener { onSettings() }
         notes.setOnClickListener { edit { toggleNotes() } }
         undo.setOnClickListener { edit { undo() } }
-        board.onCellSelected = { index -> edit { select(index) } }
-        board.onCellErased = { index -> edit { select(index); erase() } }
+        board.onCellSelected = { index: Int -> edit { select(index) } }
+        board.onCellErased = { index: Int -> edit { select(index); erase() } }
         numberPad.bind { edit { erase() } }
         render()
     }
 
     fun render() {
-        val settings = options()
+        val settings: GameOptions = options()
         board.render(session.state, settings, session.incorrectCells)
         numberPad.render(session.state.board, settings)
         numberPad.setEnabled(!session.isGameOver)

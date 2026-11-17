@@ -24,17 +24,17 @@ class LogicalStepTest {
 
     @Test
     fun anAlreadyRemovedCandidateCannotBeCountedAgain() {
-        val before = LogicalState.from(SudokuBoard.empty())
-        val step = LogicalStep(SolvingTechnique.NAKED_PAIR, eliminations = mapOf(0 to setOf(5)))
-        val remaining = before.candidates.toMutableList().apply { this[0] = this[0] - 5 }
-        val after = before.copy(candidates = remaining)
+        val before: LogicalState = LogicalState.from(SudokuBoard.empty())
+        val step: LogicalStep = LogicalStep(SolvingTechnique.NAKED_PAIR, eliminations = mapOf(0 to setOf(5)))
+        val remaining: MutableList<Set<Int>> = before.candidates.toMutableList().apply { this[0] = this[0] - 5 }
+        val after: LogicalState = before.copy(candidates = remaining)
         assertTrue(step.isApplicableTo(before))
         assertFalse(step.isApplicableTo(after))
     }
 
     @Test
     fun aPlacementMustActuallyFillAnEmptyCell() {
-        val step = LogicalStep(SolvingTechnique.NAKED_SINGLE, placements = mapOf(0 to 5))
+        val step: LogicalStep = LogicalStep(SolvingTechnique.NAKED_SINGLE, placements = mapOf(0 to 5))
         assertTrue(step.isApplicableTo(LogicalState.from(SudokuBoard.empty())))
         assertFalse(step.isApplicableTo(LogicalState.from(SamplePuzzle.create().board)))
     }

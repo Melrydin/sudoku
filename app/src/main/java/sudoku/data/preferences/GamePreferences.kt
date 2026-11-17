@@ -1,38 +1,30 @@
 package sudoku.data.preferences
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.core.content.edit
 import sudoku.domain.settings.BoardLayoutOptions
 import sudoku.domain.settings.GameOptions
 
 class GamePreferences(context: Context) {
-    private val preferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-    private val defaults = GameOptions()
-    private val layoutDefaults = BoardLayoutOptions()
+    private val preferences: SharedPreferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+    private val defaults: GameOptions = GameOptions()
+    private val layoutDefaults: BoardLayoutOptions = BoardLayoutOptions()
 
     var options: GameOptions
         get() = GameOptions(
-            highlightSameDigits = preferences.getBoolean(
-                "highlight_same_digits",
-                defaults.highlightSameDigits
-            ),
-            showRemainingCount = preferences.getBoolean(
-                "show_remaining_count",
-                defaults.showRemainingCount
-            ),
-            prefillNotes = preferences.getBoolean("prefill_notes", defaults.prefillNotes),
-            autoRemoveNotes = preferences.getBoolean("auto_remove_notes", defaults.autoRemoveNotes),
-            hideCompletedDigits = preferences.getBoolean(
-                "hide_completed_digits",
-                defaults.hideCompletedDigits
-            ),
-            boardAnimations = preferences.getBoolean("board_animations", defaults.boardAnimations),
-            showTimer = preferences.getBoolean("show_timer", defaults.showTimer),
-            circleGivens = preferences.getBoolean("circle_givens", defaults.circleGivens),
-            doubleTapErase = preferences.getBoolean("double_tap_erase", defaults.doubleTapErase),
-            holdToErase = preferences.getBoolean("hold_to_erase", defaults.holdToErase),
+            highlightSameDigits = booleanOption("highlight_same_digits", defaults.highlightSameDigits),
+            showRemainingCount = booleanOption("show_remaining_count", defaults.showRemainingCount),
+            prefillNotes = booleanOption("prefill_notes", defaults.prefillNotes),
+            autoRemoveNotes = booleanOption("auto_remove_notes", defaults.autoRemoveNotes),
+            hideCompletedDigits = booleanOption("hide_completed_digits", defaults.hideCompletedDigits),
+            boardAnimations = booleanOption("board_animations", defaults.boardAnimations),
+            showTimer = booleanOption("show_timer", defaults.showTimer),
+            circleGivens = booleanOption("circle_givens", defaults.circleGivens),
+            doubleTapErase = booleanOption("double_tap_erase", defaults.doubleTapErase),
+            holdToErase = booleanOption("hold_to_erase", defaults.holdToErase),
         )
-        set(value) = preferences.edit {
+        set(value: GameOptions) = preferences.edit {
             putBoolean("highlight_same_digits", value.highlightSameDigits)
             putBoolean("show_remaining_count", value.showRemainingCount)
             putBoolean("prefill_notes", value.prefillNotes)
@@ -52,9 +44,12 @@ class GamePreferences(context: Context) {
             preferences.getFloat("board_horizontal", layoutDefaults.horizontalBias)
                 .coerceIn(0f, 1f),
         )
-        set(value) = preferences.edit {
+        set(value: BoardLayoutOptions) = preferences.edit {
             putFloat("board_width", value.widthFraction)
             putFloat("board_vertical", value.verticalBias)
             putFloat("board_horizontal", value.horizontalBias)
         }
+
+    private fun booleanOption(key: String, defaultValue: Boolean): Boolean =
+        preferences.getBoolean(key, defaultValue)
 }

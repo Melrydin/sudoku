@@ -19,9 +19,9 @@ Do not implement or replace the remaining difficulty-grading algorithms without 
 - Follow SRP. Give each class, file, and function one clear responsibility.
 - Keep one abstraction level per function. Extract lower-level details into well-named helpers.
 - Add clear, concise comments only for complex or non-obvious decisions. Do not restate the code.
-- Use explicit Kotlin types when they clarify public APIs or non-obvious values.
-  Allow inference for obvious local values.
-- Keep function return types non-nullable. Represent absence with an empty collection, an explicit result type,
+- Always declare explicit, non-nullable Kotlin types for variables and properties, including local `val` and `var`.
+- Always declare explicit, non-nullable return types for functions that return a value.
+- Represent absence with an empty collection, an explicit result type,
   or a clearly defined sentinel outside the valid value range (for example, `0` when valid digits are `1..9`).
 
 ## Game design
@@ -73,7 +73,7 @@ Do not implement or replace the remaining difficulty-grading algorithms without 
 - `domain.grading`: the user's logical-technique contracts and grading policy.
 - `domain.grading.techniques`: one detector file per technique; the user implements their detection algorithms.
 - `domain.settings`: platform-independent option values and color-theme identifiers.
-- `domain.common`: cancellation shared by generation and solution counting.
+- `domain.common`: cancellation and explicit optional values shared across domain features.
 - `data.game`: SharedPreferences game repository and JSON encoding.
 - `domain.statistics` and `data.statistics`: completed-game records and their persisted leaderboard.
 - `data.preferences`: persisted app choices, gameplay options, and board layout.
@@ -145,12 +145,12 @@ Do not implement or replace the remaining difficulty-grading algorithms without 
 ## Open milestones
 
 Technique-based difficulty grading is the current algorithm milestone; the user implements its algorithms.
-Six detectors are implemented and tested: Full House, Naked Single, Hidden Single,
-Locked Candidates Pointing, Locked Candidates Claiming, and Naked Pair.
+Seven detectors are implemented and tested: Full House, Naked Single, Hidden Single,
+Locked Candidates Pointing, Locked Candidates Claiming, Naked Pair, and Hidden Pair.
 
-1. Implement and test Hidden Pair next.
-2. Implement and test the remaining detectors: Naked Triple, Hidden Triple, X-Wing, Naked Quad,
-   Hidden Quad, Swordfish, and XY-Wing. These seven and Hidden Pair currently return `NotImplemented`.
+1. Implement and test Naked Triple next.
+2. Implement and test the remaining detectors: Hidden Triple, X-Wing, Naked Quad,
+   Hidden Quad, Swordfish, and XY-Wing. These six and Naked Triple currently return `NotImplemented`.
 3. Implement and test `DifficultyAnalyzer`: initialize candidates once, apply effective steps,
    restart technique priority after each step, and grade solved boards by the highest technique tier used.
    Preserve candidate eliminations and return `Unrated` when solving stalls; the analyzer is currently a placeholder.

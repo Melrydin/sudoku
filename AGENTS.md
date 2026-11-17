@@ -21,6 +21,8 @@ Do not implement or replace the remaining difficulty-grading algorithms without 
 - Add clear, concise comments only for complex or non-obvious decisions. Do not restate the code.
 - Use explicit Kotlin types when they clarify public APIs or non-obvious values.
   Allow inference for obvious local values.
+- Keep function return types non-nullable. Represent absence with an empty collection, an explicit result type,
+  or a clearly defined sentinel outside the valid value range (for example, `0` when valid digits are `1..9`).
 
 ## Game design
 

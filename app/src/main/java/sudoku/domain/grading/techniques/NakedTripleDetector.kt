@@ -16,7 +16,7 @@ class NakedTripleDetector : TechniqueDetector {
         units.forEach { unit: List<Int> ->
             val candidateCells: List<Int> =
                 unit.filter { cell: Int -> state.candidates[cell].size in 2..3 }
-            val combinations: List<List<Int>> = findCellCombinations(candidateCells)
+            val combinations: List<List<Int>> = combinationsOfThree(candidateCells)
             for (combination: List<Int> in combinations) {
                 if (!isNakedTriple(combination, state)) continue
                 val eliminations: Map<Int, Set<Int>> = findEliminations(unit, combination, state)
@@ -27,19 +27,6 @@ class NakedTripleDetector : TechniqueDetector {
             }
         }
         return TechniqueSearchResult.NotFound
-    }
-
-    private fun findCellCombinations(cells: List<Int>): List<List<Int>> {
-        val combinations: MutableList<List<Int>> = mutableListOf()
-
-        for (first: Int in 0 until (cells.size - 2)) {
-            for (second: Int in (first + 1) until (cells.size - 1)) {
-                for (third: Int in (second + 1) until cells.size) {
-                    combinations.add(listOf(cells[first], cells[second], cells[third]))
-                }
-            }
-        }
-        return combinations
     }
 
     private fun isNakedTriple(

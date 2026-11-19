@@ -72,6 +72,7 @@ Do not implement or replace the remaining difficulty-grading algorithms without 
 - `domain.solver`: bounded solution counting and reference-solution resolution.
 - `domain.grading`: the user's logical-technique contracts and grading policy.
 - `domain.grading.techniques`: one detector file per technique; the user implements their detection algorithms.
+- `domain.grading.techniques.helpers`: shared combination and candidate-elimination functions used by the detectors.
 - `domain.settings`: platform-independent option values and color-theme identifiers.
 - `domain.common`: cancellation and explicit optional values shared across domain features.
 - `data.game`: SharedPreferences game repository and JSON encoding.
@@ -145,12 +146,13 @@ Do not implement or replace the remaining difficulty-grading algorithms without 
 ## Open milestones
 
 Technique-based difficulty grading is the current algorithm milestone; the user implements its algorithms.
-Ten detectors are implemented and tested: Full House, Naked Single, Hidden Single,
-Locked Candidates Pointing, Locked Candidates Claiming, Naked Pair, Hidden Pair, Naked Triple, Hidden Triple, and X-Wing.
+Eleven detectors are implemented and tested: Full House, Naked Single, Hidden Single,
+Locked Candidates Pointing, Locked Candidates Claiming, Naked Pair, Hidden Pair, Naked Triple, Hidden Triple,
+X-Wing, and Naked Quad.
 
-1. Implement and test Naked Quad next.
-2. Implement and test the remaining detectors: Hidden Quad, Swordfish, and XY-Wing.
-   These three and Naked Quad currently return `NotImplemented`.
+1. Implement and test Hidden Quad next.
+2. Implement and test the remaining detectors: Swordfish and XY-Wing.
+   These two and Hidden Quad currently return `NotImplemented`.
 3. Implement and test `DifficultyAnalyzer`: initialize candidates once, apply effective steps,
    restart technique priority after each step, and grade solved boards by the highest technique tier used.
    Preserve candidate eliminations and return `Unrated` when solving stalls; the analyzer is currently a placeholder.

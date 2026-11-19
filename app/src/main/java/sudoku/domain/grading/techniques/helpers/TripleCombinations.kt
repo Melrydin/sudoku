@@ -1,4 +1,4 @@
-package sudoku.domain.grading.techniques
+package sudoku.domain.grading.techniques.helpers
 
 internal fun combinationsOfThree(values: List<Int>): List<List<Int>> {
     val combinations: MutableList<List<Int>> = mutableListOf()

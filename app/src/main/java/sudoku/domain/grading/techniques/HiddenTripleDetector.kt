@@ -7,6 +7,7 @@ import sudoku.domain.grading.LogicalStep
 import sudoku.domain.grading.SolvingTechnique
 import sudoku.domain.grading.TechniqueDetector
 import sudoku.domain.grading.TechniqueSearchResult
+import sudoku.domain.grading.techniques.helpers.combinationsOfThree
 
 class HiddenTripleDetector : TechniqueDetector {
     override val technique: SolvingTechnique = SolvingTechnique.HIDDEN_TRIPLE

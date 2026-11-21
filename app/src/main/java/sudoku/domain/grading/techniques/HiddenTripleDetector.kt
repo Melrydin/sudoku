@@ -8,6 +8,8 @@ import sudoku.domain.grading.SolvingTechnique
 import sudoku.domain.grading.TechniqueDetector
 import sudoku.domain.grading.TechniqueSearchResult
 import sudoku.domain.grading.techniques.helpers.combinationsOfThree
+import sudoku.domain.grading.techniques.helpers.findCandidateCells
+import sudoku.domain.grading.techniques.helpers.findEliminations
 
 class HiddenTripleDetector : TechniqueDetector {
     override val technique: SolvingTechnique = SolvingTechnique.HIDDEN_TRIPLE
@@ -29,34 +31,5 @@ class HiddenTripleDetector : TechniqueDetector {
             }
         }
         return TechniqueSearchResult.NotFound
-    }
-
-    private fun findCandidateCells(
-        unit: List<Int>,
-        combination: List<Int>,
-        state: LogicalState,
-    ): Set<Int> {
-        val candidateCells: MutableSet<Int> = mutableSetOf()
-        for (digit: Int in combination) {
-            val digitCells: List<Int> = unit.filter { cell: Int -> digit in state.candidates[cell] }
-            if (digitCells.isEmpty()) return emptySet()
-            candidateCells.addAll(digitCells)
-        }
-        return candidateCells
-    }
-
-    private fun findEliminations(
-        combination: List<Int>,
-        cells: Set<Int>,
-        state: LogicalState
-    ): Map<Int, Set<Int>> {
-        val eliminations: MutableMap<Int, Set<Int>> = mutableMapOf()
-        for (cell: Int in cells) {
-            val removableDigits: Set<Int> = state.candidates[cell].filter { candidate: Int ->
-                candidate !in combination
-            }.toSet()
-            if (removableDigits.isNotEmpty()) eliminations[cell] = removableDigits
-        }
-        return eliminations
     }
 }

@@ -1,15 +1,35 @@
 package sudoku.domain.grading.techniques
 
+import sudoku.domain.board.SudokuBoard
+import sudoku.domain.board.SudokuUnits
 import sudoku.domain.grading.LogicalState
+import sudoku.domain.grading.LogicalStep
 import sudoku.domain.grading.SolvingTechnique
 import sudoku.domain.grading.TechniqueDetector
 import sudoku.domain.grading.TechniqueSearchResult
+import sudoku.domain.grading.techniques.helpers.combinationsOfFour
+import sudoku.domain.grading.techniques.helpers.findCandidateCells
+import sudoku.domain.grading.techniques.helpers.findEliminations
 
 class HiddenQuadDetector : TechniqueDetector {
     override val technique: SolvingTechnique = SolvingTechnique.HIDDEN_QUAD
 
     override fun findStep(state: LogicalState): TechniqueSearchResult {
-        // TODO: Implement Hidden Quad detection and return the first applicable step.
-        return TechniqueSearchResult.NotImplemented
+        val units: List<List<Int>> = SudokuUnits.all
+        val digits: List<Int> = (1..SudokuBoard.SIZE).toList()
+        val combinations: List<List<Int>> = combinationsOfFour(digits)
+        units.forEach { unit: List<Int> ->
+            for (combination: List<Int> in combinations) {
+                val candidateCells: Set<Int> = findCandidateCells(unit, combination, state)
+                if (candidateCells.size != 4) continue
+                val eliminations: Map<Int, Set<Int>> =
+                    findEliminations(combination, candidateCells, state)
+                if (eliminations.isEmpty()) continue
+                return TechniqueSearchResult.Found(
+                    LogicalStep(technique, eliminations = eliminations)
+                )
+            }
+        }
+        return TechniqueSearchResult.NotFound
     }
 }

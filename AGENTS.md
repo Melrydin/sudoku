@@ -146,13 +146,13 @@ Do not implement or replace the remaining difficulty-grading algorithms without 
 ## Open milestones
 
 Technique-based difficulty grading is the current algorithm milestone; the user implements its algorithms.
-Eleven detectors are implemented and tested: Full House, Naked Single, Hidden Single,
+Twelve detectors are implemented and tested: Full House, Naked Single, Hidden Single,
 Locked Candidates Pointing, Locked Candidates Claiming, Naked Pair, Hidden Pair, Naked Triple, Hidden Triple,
-X-Wing, and Naked Quad.
+X-Wing, Naked Quad, and Hidden Quad.
 
-1. Implement and test Hidden Quad next.
-2. Implement and test the remaining detectors: Swordfish and XY-Wing.
-   These two and Hidden Quad currently return `NotImplemented`.
+1. Implement and test Swordfish next.
+2. Implement and test the remaining detector: XY-Wing.
+   Swordfish and XY-Wing currently return `NotImplemented`.
 3. Implement and test `DifficultyAnalyzer`: initialize candidates once, apply effective steps,
    restart technique priority after each step, and grade solved boards by the highest technique tier used.
    Preserve candidate eliminations and return `Unrated` when solving stalls; the analyzer is currently a placeholder.
